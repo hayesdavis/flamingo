@@ -45,21 +45,22 @@ module Flamingo
     
     private
       def predicate_query
-        predicate_param(:track) || predicate_param(:follow)
+        if predicate.kind_of?(String)
+          predicate
+        else
+          predicate.map{|key,value| "#{key}=#{param_value(value)}" }.join("&")
+        end
       end
       
-      def predicate_param(key)
-        val = predicate[key]
-        return nil unless val
-        param_val = case val
+      def param_value(val)
+        case val
           when String then val
           when Array then val.join(",")
+          else nil
         end
-        "#{key}=#{param_val}"
       end
       
       def dispatch_event(event_json)
-        puts event_json
         Resque.enqueue(Flamingo::DispatchEvent,event_json)
       end
       

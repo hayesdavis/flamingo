@@ -4,9 +4,6 @@ require 'flamingo'
 screen_name = ARGV[0]
 password = ARGV[1]
 resource = ARGV[2]
-type = ARGV[3]
-params = ARGV[4].split(",")
+predicate = ARGV[3]
 
-Flamingo::Wader.new(
-  screen_name,password,resource,{type.to_sym=>params}
-).run
+Flamingo::Wader.new(screen_name,password,resource,predicate).run
