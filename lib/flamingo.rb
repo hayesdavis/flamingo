@@ -10,7 +10,6 @@ require 'flamingo/filter'
 require 'flamingo/wader'
 
 FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
-LOGGER = Logger.new(File.join(FLAMINGO_ROOT,'log','flamingo.log'))
 
 module Flamingo
   
@@ -44,6 +43,10 @@ module Flamingo
       return @redis if @redis
       self.redis = 'localhost:6379'
       self.redis
-    end  
+    end
+
+    def logger
+      @logger ||= Logger.new(File.join(FLAMINGO_ROOT,'log','flamingo.log'))
+    end
   end 
 end

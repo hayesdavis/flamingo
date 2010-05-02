@@ -1,7 +1,8 @@
 module Flamingo
   class Wader
     
-    attr_accessor :screen_name, :password, :resource, :predicate
+    attr_accessor :screen_name, :password, :resource, :predicate, 
+      :keep_running, :stream
     
     def initialize(screen_name,password,resource,predicate)
       self.screen_name = screen_name
@@ -11,8 +12,9 @@ module Flamingo
     end
     
     def run
+      self.keep_running = true
       EventMachine::run do
-        stream = Twitter::JSONStream.connect(
+        self.stream = Twitter::JSONStream.connect(
           :ssl          => true,
           :user_agent   => "Flamingo/0.1",
           :path         => "/1/statuses/#{resource}.json?#{predicate_query}",
@@ -43,6 +45,10 @@ module Flamingo
       end  
     end
     
+    def stop
+      self.keep_running = false
+    end
+    
     private
       def predicate_query
         if predicate.kind_of?(String)
@@ -62,10 +68,20 @@ module Flamingo
       
       def dispatch_event(event_json)
         Resque.enqueue(Flamingo::DispatchEvent,event_json)
+        stop_if_needed
       end
       
       def dispatch_error(type,message,data={})
         Resque.enqueue(Flamingo::DispatchError,type,message,data)
+        stop_if_needed
+      end
+
+      def stop_if_needed
+        unless keep_running
+          Flamingo.logger.info("Terminating gracefully")
+          stream.stop
+          EM.stop
+        end
       end
   end
 end

@@ -2,8 +2,18 @@ $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
 
 screen_name = ARGV[0]
-password = ARGV[1]
-resource = ARGV[2]
-predicate = ARGV[3]
+password    = ARGV[1]
+resource    = ARGV[2]
+predicate   = ARGV[3]
 
-Flamingo::Wader.new(screen_name,password,resource,predicate).run
+wader = Flamingo::Wader.new(screen_name,password,resource,predicate)
+
+['TERM','INT'].each do |sig|
+  trap(sig) do
+    puts "\n#{sig} signal received. Terminating..."
+    wader.stop
+  end
+end
+
+puts "Wading in the stream"
+wader.run
