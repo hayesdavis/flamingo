@@ -1,7 +1,7 @@
 module Flamingo
   
   module Filter
-  
+    
     class << self
       def set(key,*values)
         delete(key)
@@ -34,7 +34,7 @@ module Flamingo
         end
       end
 
-      def params
+      def all
         keys.inject({}) do |h,key|
           h[key] = get(key)
           h

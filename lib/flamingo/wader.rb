@@ -14,12 +14,15 @@ module Flamingo
     def run
       self.keep_running = true
       EventMachine::run do
-        self.stream = Twitter::JSONStream.connect(
+        stream_opts = {
           :ssl          => true,
           :user_agent   => "Flamingo/0.1",
           :path         => "/1/statuses/#{resource}.json?#{predicate_query}",
-          :auth         => "#{screen_name}:#{password}"
-        )
+          :auth         => "#{screen_name}:#{password}"        
+        }
+        Flamingo.logger.info(stream_opts.inspect)
+        self.stream = Twitter::JSONStream.connect(stream_opts)
+        Flamingo.logger.info("Listening on stream")
   
         stream.each_item do |event_json|
           dispatch_event(event_json)
