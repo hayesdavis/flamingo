@@ -20,9 +20,8 @@ module Flamingo
           :path         => "/1/statuses/#{resource}.json?#{predicate_query}",
           :auth         => "#{screen_name}:#{password}"        
         }
-        Flamingo.logger.info(stream_opts.inspect)
         self.stream = Twitter::JSONStream.connect(stream_opts)
-        Flamingo.logger.info("Listening on stream")
+        Flamingo.logger.info("Listening on stream: #{stream_opts[:path]}")
   
         stream.each_item do |event_json|
           dispatch_event(event_json)
