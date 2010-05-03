@@ -9,6 +9,8 @@ require 'flamingo/dispatch_error'
 require 'flamingo/filter'
 require 'flamingo/wader'
 require 'flamingo/daemon'
+require 'flamingo/dispatcher/route'
+require 'flamingo/dispatcher/map'
 
 FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
 
@@ -48,6 +50,14 @@ module Flamingo
 
     def logger
       @logger ||= Logger.new(File.join(FLAMINGO_ROOT,'log','flamingo.log'))
+    end
+
+    def router
+      unless @router
+        load "#{FLAMINGO_ROOT}/config/routes.rb"
+        @router = Flamingo::Dispatcher::Map.instance
+      end
+      @router
     end
   end 
 end
