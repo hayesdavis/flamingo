@@ -22,11 +22,20 @@ module Flamingo
         dispatcher
       end
       
+      def start_new_server
+        server = ServerProcess.new
+        server.start
+        server
+      end
+      
       def trap_signals
         trap("TERM") { terminate! }
         trap("INT")  { terminate! }
-        trap("USR1") { signal_children("USR1") }
-        trap("USR2") { signal_children("USR2") }
+        trap("USR1") { restart_wader }
+      end
+
+      def restart_wader
+        @wader.kill("INT")
       end
       
       def signal_children(sig)
@@ -46,6 +55,7 @@ module Flamingo
       def start_children
         @wader = start_new_wader
         @dispatchers = [start_new_dispatcher]
+        @server = start_new_server
       end
       
       def wait_on_children()
@@ -55,6 +65,9 @@ module Flamingo
             if @wader.pid == child_pid
               puts "Wader died"
               @wader = start_new_wader
+            elsif @server.pid == child_pid
+              puts "Server died"
+              @server = start_new_server
             elsif (to_delete = @dispatchers.find{|d| d.pid == child_pid})
               @dispatchers.delete(to_delete)
               puts "Dispatcher #{child_pid} died"
