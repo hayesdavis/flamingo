@@ -1,44 +1,36 @@
 module Flamingo
   class Wader
     
-    attr_accessor :screen_name, :password, :resource, :predicate, 
-      :keep_running, :stream
+    attr_accessor :screen_name, :password, :keep_running, :stream, :connection
     
-    def initialize(screen_name,password,resource,predicate)
+    def initialize(screen_name,password,stream)
       self.screen_name = screen_name
       self.password = password
-      self.resource = resource
-      self.predicate = predicate
+      self.stream = stream
     end
     
     def run
       self.keep_running = true
       EventMachine::run do
-        stream_opts = {
-          :ssl          => true,
-          :user_agent   => "Flamingo/0.1",
-          :path         => "/1/statuses/#{resource}.json?#{predicate_query}",
-          :auth         => "#{screen_name}:#{password}"        
-        }
-        self.stream = Twitter::JSONStream.connect(stream_opts)
-        Flamingo.logger.info("Listening on stream: #{stream_opts[:path]}")
+        self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
+        Flamingo.logger.info("Listening on stream: #{stream.path}")
   
-        stream.each_item do |event_json|
+        connection.each_item do |event_json|
           dispatch_event(event_json)
         end
   
-        stream.on_error do |message|
+        connection.on_error do |message|
           dispatch_error(:generic,message)
         end
   
-        stream.on_reconnect do |timeout, retries|
+        connection.on_reconnect do |timeout, retries|
           dispatch_error(:reconnection,
             "Will reconnect after #{timeout}. Retry \##{retries}",
             {:timeout=>timeout,:retries=>retries}
           )
         end
   
-        stream.on_max_reconnects do |timeout, retries|
+        connection.on_max_reconnects do |timeout, retries|
           dispatch_error(:fatal,
             "Failed to reconnect after #{retries} retries",
             {:timeout=>timeout,:retries=>retries}
@@ -52,23 +44,8 @@ module Flamingo
     end
     
     private
-      def predicate_query
-        if predicate.kind_of?(String)
-          predicate
-        else
-          predicate.map{|key,value| "#{key}=#{param_value(value)}" }.join("&")
-        end
-      end
-      
-      def param_value(val)
-        case val
-          when String then val
-          when Array then val.join(",")
-          else nil
-        end
-      end
-      
       def dispatch_event(event_json)
+        puts "Received #{event_json}"
         Resque.enqueue(Flamingo::DispatchEvent,event_json)
         stop_if_needed
       end
@@ -81,7 +58,7 @@ module Flamingo
       def stop_if_needed
         unless keep_running
           Flamingo.logger.info("Terminating gracefully")
-          stream.stop
+          connection.stop
           EM.stop
         end
       end

@@ -5,26 +5,38 @@ module Flamingo
     set :static, true
     set :logging, true
     
-    get '/filters.json' do
-      ActiveSupport::JSON.encode(Flamingo::Filter.all)
+    get '/streams/:name.json' do
+      stream = Stream.get(params[:name])
+      to_json(
+        :name=>stream.name,
+        :resource=>stream.resource,
+        :params=>stream.params.all
+      )
     end
     
-    get '/filters/:key.json' do
-      ActiveSupport::JSON.encode(Flamingo::Filter.get(params[:key]))
+    get '/streams/:name/:key.json' do
+      stream = Stream.get(params[:name])
+      to_json(stream.params[params[:key]])
     end
       
-    post '/filters/:key.json' do
+    post '/streams/:name/:key.json' do
       key = params[:key]
-      Flamingo::Filter.add(key,*params[:values].split(","))
+      stream = Stream.get(params[:name])
+      stream.params.add(key,*params[:values].split(","))
       change_predicates
-      to_json(Flamingo::Filter.get(key))
+      to_json(stream.params[key])
     end
     
-    delete '/filters/:key.json' do
+    delete '/streams/:name/:key.json' do
       key = params[:key]
-      Flamingo::Filter.remove(key,*params[:values].split(","))
+      stream = Stream.get(params[:name])
+      if params[:values].blank?
+        stream.params.delete(key)
+      else
+        stream.params.remove(key,*params[:values].split(","))
+      end
       change_predicates
-      to_json(Flamingo::Filter.get(key))
+      to_json(stream.params[key])
     end
     
     private
