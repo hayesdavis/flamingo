@@ -11,7 +11,8 @@ module Flamingo
         #TODO Provide some first-level check for repeated status ids
         #TODO Consider subscribers for receiving particular terms - do the heavy 
         #     lifting of parsing tweets and delivering them to particular subscribers
-        
+        #TODO Consider window of tweets (approx 3 seconds) and sort before 
+        #     dispatching to improve in-order delivery (helps with "k-sorted") 
         type, event = typed_event(parse(event_json))
         puts Flamingo.router.destinations(type,event).inspect
       end
