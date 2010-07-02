@@ -18,11 +18,30 @@ module Flamingo
       stream = Stream.get(params[:name])
       to_json(stream.params[params[:key]])
     end
-      
+    
+    # One of:
+    #   Add values to the existing key
+    #     ?values=A,B,C
+    #   Add and remove in a single request
+    #     ?add=A,B&remove=C
     post '/streams/:name/:key.json' do
       key = params[:key]
       stream = Stream.get(params[:name])
-      stream.params.add(key,*params[:values].split(","))
+      new_terms = params[:add] || params[:values]
+      stream.params.add(key,*new_terms.split(","))
+      remove_terms = params[:remove]
+      if remove_terms
+        stream.params.remove(key,*remove_terms.split(","))
+      end
+      change_predicates
+      to_json(stream.params[key])
+    end
+    
+    put '/streams/:name/:key.json' do
+      key = params[:key]
+      stream = Stream.get(params[:name])
+      new_terms = params[:values]
+      stream.params[key] = new_terms.split(",")
       change_predicates
       to_json(stream.params[key])
     end
@@ -39,9 +58,36 @@ module Flamingo
       to_json(stream.params[key])
     end
     
+    #Subscriptions
+    get '/subscriptions.json' do 
+      subs = Subscription.all.map do |sub|
+        {:name=>sub.name}
+      end
+      to_json(subs)
+    end
+
+    post '/subscriptions.json' do
+      sub = Subscription.new(params[:name])
+      sub.save
+      to_json(:name=>sub.name)
+    end
+    
+    get '/subscriptions/:name.json' do
+      sub = Subscription.find(params[:name])
+      not_found(to_json(:error=>"Subscription does not exist")) unless sub
+      to_json(:name=>sub.name)
+    end
+    
+    delete '/subscriptions/:name.json' do
+      sub = Subscription.find(params[:name])
+      not_found(to_json(:error=>"Subscription does not exist")) unless sub
+      sub.delete
+      to_json(:name=>sub.name)
+    end
+    
     private
       def change_predicates
-        if options.daemon_pid
+        if options.respond_to?(:daemon_pid)
           Process.kill("USR1",options.daemon_pid)
           puts "Rotating wader in daemon"
         end

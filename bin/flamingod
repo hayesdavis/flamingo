@@ -1,35 +1,4 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
-require 'yaml'
-require 'erb'
 
-config = YAML.load(ERB.new(
-  IO.read("#{FLAMINGO_ROOT}/config/flamingo.yml")
-).result)
-
-screen_name = config["username"]
-password    = config["password"]
-resource    = config["resource"]
-predicates  = Flamingo::Filter.all
-
-daemon = Flamingo::Daemon.new('flamingod',config["pid_file"])
-
-if daemon.running? && ARGV[0] != 'reconnect'
-  puts "flamingod process #{daemon.pid} is already running!"
-  puts "Use 'flamingod reconnect' to reload running process with new predicates"
-  exit
-end
-
-if daemon.running?
-  puts "Interrupting current process at #{daemon.pid}" 
-end
-
-puts "Starting daemon"
-daemon.rotate_and_daemonize
-
-wader = Flamingo::Wader.new(screen_name,password,resource,predicates)
-['TERM','INT'].each do |sig|
-  trap(sig) { wader.stop }
-end
-Flamingo.logger.info "Starting wader"
-wader.run
+Flamingo::Daemon::Flamingod.new.run()

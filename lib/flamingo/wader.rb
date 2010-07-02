@@ -45,7 +45,6 @@ module Flamingo
     
     private
       def dispatch_event(event_json)
-        puts "Received #{event_json}"
         Resque.enqueue(Flamingo::DispatchEvent,event_json)
         stop_if_needed
       end

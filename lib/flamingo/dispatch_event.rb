@@ -14,7 +14,11 @@ module Flamingo
         #TODO Consider window of tweets (approx 3 seconds) and sort before 
         #     dispatching to improve in-order delivery (helps with "k-sorted") 
         type, event = typed_event(parse(event_json))
-        puts Flamingo.router.destinations(type,event).inspect
+#        puts Flamingo.router.destinations(type,event).inspect
+        Subscription.all.each do |sub|
+          Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
+          puts "Put job on subscription queue #{sub.name} for #{event_json}"
+        end
       end
       
       def parse(json)
