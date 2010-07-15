@@ -14,6 +14,25 @@ module Flamingo
       )
     end
     
+    # Usage:
+    # streams/filter?track=a,b,c&follow=d,e,f
+    put '/streams/:name.json' do
+      key = params[:key]
+      stream = Stream.get(params[:name])
+      params.keys.each do |key|
+        unless key.to_sym == :name
+          puts "Setting #{key} to #{params[key]}"
+          stream.params[key] = params[key].split(",")
+        end
+      end
+      change_predicates  
+      to_json(
+        :name=>stream.name,
+        :resource=>stream.resource,
+        :params=>stream.params.all
+      )      
+    end
+    
     get '/streams/:name/:key.json' do
       stream = Stream.get(params[:name])
       to_json(stream.params[params[:key]])
