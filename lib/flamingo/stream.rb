@@ -51,8 +51,8 @@ module Flamingo
     
       def param_value(val)
         case val
-          when String then val
-          when Array then val.join(",")
+          when String then CGI.escape(val)
+          when Array then val.map{|v| CGI.escape(v) }.join(",")
           else nil
         end
       end    
