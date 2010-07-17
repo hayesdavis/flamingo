@@ -8,6 +8,13 @@ module Flamingo
       self.stream = stream
     end
 
+    #
+    # The main EventMachine run loop
+    #
+    # Start the stream listener (using twitter-stream, http://github.com/voloko/twitter-stream)
+    # Listen for responses and errors;
+    #   dispatch each for later handling
+    #
     def run
       self.keep_running = true
       EventMachine::run do
@@ -43,19 +50,24 @@ module Flamingo
     end
 
     private
+      # Handles a stream event:
+      #   Push it into the Queue
       def dispatch_event(event_json)
-        Resque.enqueue(Flamingo::DispatchEvent,event_json)
+        Resque.enqueue(Flamingo::DispatchEvent, event_json)
         stop_if_needed
       end
 
+      # Handles a stream error:
+      #   Push it into the Queue
       def dispatch_error(type, message, data={})
-        Resque.enqueue(Flamingo::DispatchError,type,message,data)
+        Resque.enqueue(Flamingo::DispatchError, type, message, data)
+        # Flamingo.logger.debug("Wader error: #{type} #{message}")
         stop_if_needed
       end
 
       def stop_if_needed
         unless keep_running
-          Flamingo.logger.info("Terminating gracefully")
+          Flamingo.logger.info("Wader terminating gracefully")
           connection.stop
           EM.stop
         end

@@ -8,15 +8,32 @@ Flamingo uses EventMachine to efficiently route and process stream and dispatch 
 
 h3. wader
 
-The wader
+The wader process starts the stream and dispatches stream responses as they arrive.
 
-h3. dispatcher
+h3. dispatcher workers
 
-Flamingo's dispatcher workers act
+Flamingo's dispatcher workers act on stream responses.
 
 h3. server
 
-Flamingo provides a lightweight Sinatra dashboard for creating and monitoring stream requests.
+Flamingo server creates and manages stream requests using a lightweight Sinatra responder.
+
+h3. flamingod
+
+The Flamingod is the main overseer of the Flamingo flock.
+
+Starts three sets of children:
+
+* A wader process: initiates stream request, pushes each response into the queue
+* A Sinatra server: lightweight responder to create and manage subscriptions
+* A set of dispatchers: worker processes that handle each stream response.
+
+You can control the flamingod with the following signals:
+
+* TERM and INT will kill the flamingod parent process, and signal each child with TERM
+* USR1 will restart the wader gracefully.
+
+
 
 h2. Dependencies
 

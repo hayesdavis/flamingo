@@ -1,6 +1,21 @@
 module Flamingo
   FLAMINGO_SLEEP_DELAY = ENV['FLAMINGO_SLEEP_DELAY'].to_i || 0
   module Daemon
+    #
+    # Flamingod is the main overseer of the Flamingo flock.
+    #
+    # Starts three sets of children:
+    #
+    # * A wader process: initiates stream request, pushes each response into the queue
+    # * A Sinatra server: lightweight responder to create and manage subscriptions
+    # * A set of dispatchers: worker processes that handle each stream response.
+    #
+    # You can control the flamingod with the following signals:
+    #
+    # * TERM and INT will kill the flamingod parent process, and signal each
+    #   child with TERM
+    # * USR1 will restart the wader gracefully.
+    #
     class Flamingod
 
       def exit_signaled?
@@ -59,6 +74,11 @@ module Flamingo
         @server = start_new_server
       end
 
+      #
+      # Unless signaled externally, waits in an endless loop. If any child
+      # process terminates, it attends an optional delay (set by
+      # Flamingo::FLAMINGO_SLEEP_DELAY) and then restarts that process.
+      #
       def wait_on_children()
         until exit_signaled?
           child_pid = Process.wait(-1)
