@@ -1,4 +1,6 @@
+#!/usr/bin/env ruby
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
+module Flamingo ; RETRY_DELAY_ON_GENERIC_ERROR = 2 ; end
 require 'flamingo'
 require 'irb'
 
