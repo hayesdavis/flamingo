@@ -26,31 +26,31 @@ Getting Started
 
 1. Edit `config/flamingo.yml`
 
-    username: USERNAME
-    password: PASSWORD
-    stream: filter
+        username: USERNAME
+        password: PASSWORD
+        stream: filter
 
 2. Start the Redis server
 
-    $ redis-server
+        $ redis-server
 
 3. Start the Flamingo Daemon (`flamingod`)
 
-    $ ruby bin/flamingod
+        $ ruby bin/flamingod
 
 4. Configure tracking using `flamingo` client
 
-    $ ruby bin/flamingo
-    >> s = Stream.get(:filter)
-    >> s.params[:track] = %w(FOO BAR BAZ)
-    >> Subscription.new('YOUR_NAME').save
+        $ ruby bin/flamingo
+        >> s = Stream.get(:filter)
+        >> s.params[:track] = %w(FOO BAR BAZ)
+        >> Subscription.new('YOUR_NAME').save
 
 5. View progress via logging
 
-    $ tail -f log/flamingo.log
+        $ tail -f log/flamingo.log
 
 6. View progress via `resque-web`
 
-    $ resque-web
-    [...] Starting 'resque-web'...
-    [...] 'resque-web' is already running at http://0.0.0.0:5678
+        $ resque-web
+        [...] Starting 'resque-web'...
+        [...] 'resque-web' is already running at http://0.0.0.0:5678
