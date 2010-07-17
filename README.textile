@@ -40,4 +40,4 @@ h2. Configuration
 * in @flamingo/config/flamingo.yml@, set your screen_name, password, and the stream type
 
 
-!http://farm4.static.flickr.com/3438/3302580937_0ec540b73e_b_d.jpg!
+!http://farm4.static.flickr.com/3438/3302580937_0ec540b73e_z_d.jpg!
