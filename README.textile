@@ -1,0 +1,24 @@
+
+
+
+
+h2. Dependencies
+
+* redis
+* redis-namespace
+* twitter
+* resque
+* sinatra
+* active_support
+* twitter-stream
+
+<pre>
+  sudo gem install twitter-stream resque sinatra active_support twitter redis redis-namespace
+</pre>
+
+
+h2. Configuration
+
+* Link (or mkdir) flamingo/log
+
+* in @flamingo/config/flamingo.yml@, set your screen_name, password, and the stream type
