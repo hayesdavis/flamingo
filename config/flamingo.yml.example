@@ -1,0 +1,5 @@
+# This can be an ERB file.
+
+username:       john
+password:       flamingo1
+stream:         sample

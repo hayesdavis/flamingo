@@ -1,3 +1,4 @@
 .loadpath
 .project
 log
+config/flamingo.yml
