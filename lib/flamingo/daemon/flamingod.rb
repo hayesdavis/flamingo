@@ -13,13 +13,13 @@ module Flamingo
 
       def start_new_wader
         wader = WaderProcess.new
-        # wader.start
+        wader.start
         wader
       end
 
       def start_new_dispatcher
         dispatcher = DispatcherProcess.new
-        # dispatcher.start
+        dispatcher.start
         dispatcher
       end
 
