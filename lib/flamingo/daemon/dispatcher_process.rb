@@ -6,6 +6,6 @@ module Flamingo
         puts "Starting dispatcher on #{Process.pid} under #{Process.ppid}"
         worker.work(1) # Wait 1s between jobs
       end
-    end    
+    end
   end
 end

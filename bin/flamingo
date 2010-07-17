@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
-module Flamingo ; RETRY_DELAY_ON_GENERIC_ERROR = 2 ; end
+module Flamingo SLEEP_DELAY_ON_CHILD_EXIT = 5 ; end
 require 'flamingo'
 require 'irb'
 
@@ -9,12 +9,12 @@ module Flamingo
     def filters
       Filter
     end
-    
+
     def reconnect
       puts "Issuing reconnect to flamingod"
       system("ruby #{FLAMINGO_ROOT}/bin/flamingod reconnect")
     end
-    
+
     def tail
       puts "Not implemented. Soon though"
     end

@@ -27,7 +27,9 @@ require 'flamingo/server'
 FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
 
 module Flamingo
-  
+  CONFIG_FILE = File.expand_path("#{FLAMINGO_ROOT}/config/flamingo.yml") unless defined?(Flamingo::CONFIG_FILE)
+  raise "Please create a configuration file in #{CONFIG_FILE}" unless File.exists?(CONFIG_FILE)
+
   class << self
     # PHD: Lovingly borrowed from Resque
 
@@ -51,7 +53,7 @@ module Flamingo
         raise "I don't know what to do with #{server.inspect}"
       end
     end
-  
+
     # Returns the current Redis connection. If none has been created, will
     # create a new one.
     def redis
@@ -71,5 +73,5 @@ module Flamingo
       end
       @router
     end
-  end 
+  end
 end
