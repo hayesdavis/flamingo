@@ -1,5 +1,5 @@
 module Flamingo
-  SLEEP_DELAY_ON_CHILD_EXIT = 0 unless defined?(Flamingo::SLEEP_DELAY_ON_CHILD_EXIT)
+  FLAMINGO_SLEEP_DELAY = ENV['FLAMINGO_SLEEP_DELAY'].to_i || 0
   module Daemon
     class Flamingod
 
@@ -13,13 +13,13 @@ module Flamingo
 
       def start_new_wader
         wader = WaderProcess.new
-        wader.start
+        # wader.start
         wader
       end
 
       def start_new_dispatcher
         dispatcher = DispatcherProcess.new
-        dispatcher.start
+        # dispatcher.start
         dispatcher
       end
 
@@ -64,14 +64,14 @@ module Flamingo
           child_pid = Process.wait(-1)
           unless exit_signaled?
             if @wader.pid == child_pid
-              print "Wader died" ; sleep Flamingo::SLEEP_DELAY_ON_CHILD_EXIT ; puts " ...restarting wader"
+              print "Wader died" ; sleep Flamingo::FLAMINGO_SLEEP_DELAY ; puts " ...restarting wader"
               @wader = start_new_wader
             elsif @server.pid == child_pid
-              print "Server died" ; sleep Flamingo::SLEEP_DELAY_ON_CHILD_EXIT ; puts " ...restarting server"
+              print "Server died" ; sleep Flamingo::FLAMINGO_SLEEP_DELAY ; puts " ...restarting server"
               @server = start_new_server
             elsif (to_delete = @dispatchers.find{|d| d.pid == child_pid})
               @dispatchers.delete(to_delete)
-              print "Dispatcher #{child_pid} died" ; sleep Flamingo::SLEEP_DELAY_ON_CHILD_EXIT ; puts " ...restarting dispatcher"
+              print "Dispatcher #{child_pid} died" ; sleep Flamingo::FLAMINGO_SLEEP_DELAY ; puts " ...restarting dispatcher"
               @dispatchers << start_new_dispatcher
             else
               puts "Received exit from unknown child #{child_pid}"

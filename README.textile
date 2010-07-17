@@ -1,6 +1,22 @@
+h1. Flamingo
 
+An elegant way to wade and filter the Twitter message stream.
 
+h2. Overview
 
+Flamingo uses EventMachine to efficiently route and process stream and dispatch events.
+
+h3. wader
+
+The wader
+
+h3. dispatcher
+
+Flamingo's dispatcher workers act
+
+h3. server
+
+Flamingo provides a lightweight Sinatra dashboard for creating and monitoring stream requests.
 
 h2. Dependencies
 
@@ -22,3 +38,5 @@ h2. Configuration
 * Link (or mkdir) flamingo/log
 
 * in @flamingo/config/flamingo.yml@, set your screen_name, password, and the stream type
+
+

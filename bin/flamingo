@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
-module Flamingo SLEEP_DELAY_ON_CHILD_EXIT = 5 ; end
 require 'flamingo'
 require 'irb'
 
