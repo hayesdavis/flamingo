@@ -85,6 +85,11 @@ module Flamingo
         end
       end
 
+      def run_as_daemon
+        pid = fork { run }
+        Process.detach(pid)
+      end
+
       def run
         $0 = 'flamingod'
         trap_signals
