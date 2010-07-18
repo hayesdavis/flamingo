@@ -10,6 +10,7 @@ require 'active_support'
 require 'sinatra/base'
 
 require 'flamingo/config'
+require 'flamingo/formatter'
 require 'flamingo/dispatch_event'
 require 'flamingo/dispatch_error'
 require 'flamingo/stream_params'
@@ -74,7 +75,9 @@ module Flamingo
     def logger
       @logger ||= begin
         log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
-        Logger.new(log_file)
+        logger = Logger.new(log_file)
+        logger.formatter = Flamingo::Formatter.new
+        logger
       end
     end
 
