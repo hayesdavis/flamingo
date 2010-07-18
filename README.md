@@ -29,12 +29,12 @@ Getting Started
         username: USERNAME
         password: PASSWORD
         stream: filter
-	logging:
-	  dest: /YOUR/LOG/PATH.LOG
-	  level: LOGLEVEL
+        logging:
+          dest: /YOUR/LOG/PATH.LOG
+          level: LOGLEVEL
 
     `LOGLEVEL` is one of the following:
-    `DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN`
+    `DEBUG` < `INFO` < `WARN` < `ERROR` < `FATAL` < `UNKNOWN`
 
 2. Start the Redis server
 
