@@ -60,7 +60,7 @@ module Flamingo
       when Redis::Namespace
         @redis = server
       else
-        raise "I don't know what to do with #{server.inspect}"
+        raise "Invalid redis configuration: #{server.inspect}"
       end
     end
   
@@ -71,36 +71,43 @@ module Flamingo
       self.redis = config.redis.host('localhost:6379')
       self.redis
     end
-
-    def new_logger
-
-      # determine log file location (default is FLAMINGO_ROOT/log/flamingo.log)
-      begin
-        if valid_logging_dest?(config.logging.dest)
-          log_file = config.logging.dest
-        else
-          raise :invalid_logging_dest
-        end
-      rescue
-        # default log file path
-        log_file = File.join(FLAMINGO_ROOT,'log','flamingo.log')
-      end
-
-      # determine logging level (default is Logger::INFO)
-      begin
-        log_level = Logger.const_get(config.logging.level.upcase)
-      rescue
-        log_level = Logger::INFO
-      end
-
-      # create logger facility
-      logger = Logger.new(log_file)
-      logger.level = log_level
-      logger.formatter = Flamingo::Logging::Formatter.new
-      logger
-    end
     
+    def logger
+      @logger ||= new_logger
+    end
+
     private
+      def new_logger
+        # determine log file location (default is FLAMINGO_ROOT/log/flamingo.log)
+        begin
+          if valid_logging_dest?(config.logging.dest)
+            log_file = config.logging.dest
+          else
+            raise :invalid_logging_dest
+          end
+        rescue
+          # default log file path
+          log_file = File.join(FLAMINGO_ROOT,'log','flamingo.log')
+        end
+  
+        # determine logging level (default is Logger::INFO)
+        begin
+          log_level = Logger.const_get(config.logging.level.upcase)
+        rescue
+          log_level = Logger::INFO
+        end
+  
+        # create logger facility
+        logger = Logger.new(log_file)
+        logger.level = log_level
+        logger.formatter = Flamingo::Logging::Formatter.new
+        logger
+      end
+      
+      def valid_logging_dest?(dest)
+        File.writable?(File.dirname(parent_dir))
+      end      
+    
       def validate_config!
         unless config.username(nil) && config.password(nil)
           raise "The config file must be YAML formatted and contain a username and password. See examples/flamingo.yml."
@@ -116,15 +123,6 @@ module Flamingo
           raise "No config file found in any of #{locations.join(",")}"
         end
         File.expand_path(found)
-      end
-
-    def logger
-      @logger ||= new_logger
-    end
-
-    private
-      def valid_logging_dest?(dest)
-        File.writable?(File.dirname(parent_dir))
       end
 
   end 
