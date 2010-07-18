@@ -10,7 +10,6 @@ require 'active_support'
 require 'sinatra/base'
 
 require 'flamingo/config'
-require 'flamingo/formatter'
 require 'flamingo/dispatch_event'
 require 'flamingo/dispatch_error'
 require 'flamingo/stream_params'
@@ -22,6 +21,7 @@ require 'flamingo/daemon/dispatcher_process'
 require 'flamingo/daemon/server_process'
 require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
+require 'flamingo/logging/formatter'
 require 'flamingo/server'
 
 FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
@@ -75,7 +75,7 @@ module Flamingo
         log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
         logger = Logger.new(log_file)
         logger.level = Logger::INFO
-        logger.formatter = Flamingo::Formatter.new
+        logger.formatter = Flamingo::Logging::Formatter.new
         logger
       end
     end
