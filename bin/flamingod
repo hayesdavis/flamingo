@@ -10,8 +10,7 @@ begin
   opts = OptionParser.new do |opts|
     opts.banner = <<-EOF
   Usage:
-    Starting:
-      flamingod [<options>]
+    flamingod [<options>]
   EOF
 
     opts.on("-cCONFIG", "--config-file=CONFIG", "Configuration File") do |x|
@@ -26,34 +25,37 @@ begin
       options[:daemonize] = true
     end
 
-    opts.on("-f", "--foreground", "Run in Foreground") do |x|
+    opts.on("-f", "--foreground", "Run in Foreground (default)") do |x|
       options[:daemonize] = nil
     end
 
-    opts.on("-p", "--pid-file", "PID File") do |x|
-      options[:pid_file] = nil
+    opts.on("-pPID_FILE", "--pid-file=PID_FILE", "PID File (only when daemonized)") do |x|
+      options[:pid_file] = x
     end
+
   end
 
   opts.parse!
 
-  if ARGV[0]
-    STDERR.write("Passing config file as direct argument is deprecated.\n")
-  end
-  # deprecated but using it anyways
-  options[:config_file] ||= ARGV[0]
   Flamingo.configure!(options[:config_file])
-
   if options[:pid_file]
-    Flaming.config.pid_file = options[:pid_file]
+    Flamingo.config.pid_file = File.expand_path(options[:pid_file])
   end
+
 rescue => e
   $stderr.puts "Could not start: #{e.message}"
   exit(-1)
 end
 
+flamingod = Flamingo::Daemon::Flamingod.new 
 if options[:daemonize]
-  Flamingo::Daemon::Flamingod.new.run_as_daemon()
+  begin
+    pid = flamingod.run_as_daemon()
+    puts "flamingod process #{pid} started" 
+  rescue => e
+    $stderr.puts "Could not start: #{e.message}"
+    exit(-2)
+  end
 else
-  Flamingo::Daemon::Flamingod.new.run()
+  flamingod.run()
 end

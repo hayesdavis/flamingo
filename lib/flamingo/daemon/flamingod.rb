@@ -85,23 +85,21 @@ module Flamingo
         end
       end
 
-      def write_pid_file (pid)
-        begin
-          File.open(
-            Flamingo.config.pid_file("/dev/null"), "w"
-          ).write("#{pid}\n")
-        rescue
-          # do nothing
-        end
-      end
-
       def run_as_daemon
-        # sorry ol' blue eyes
-        $stdout = File.new('/dev/null', 'w')
-
-        pid = fork { run }
-        write_pid_file(pid)
+        pid_file = PidFile.new
+        if pid_file.running?
+          raise "flamingod process #{pid_file.read} appears to be running"
+        end
+        pid = fork do
+          pid_file.write(Process.pid)
+          [$stdout,$stdin,$stderr].each do |io|
+            io.reopen '/dev/null' rescue nil
+          end
+          run
+          pid_file.delete
+        end
         Process.detach(pid)
+        pid
       end
 
       def run
