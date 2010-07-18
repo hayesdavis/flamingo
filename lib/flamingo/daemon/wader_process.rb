@@ -8,7 +8,7 @@ module Flamingo
       
       def run
         register_signal_handlers
-        $0 = 'wader (flamingod)'
+        $0 = 'flamingod-wader'
         config = Flamingo.config
         
         screen_name = config.username
