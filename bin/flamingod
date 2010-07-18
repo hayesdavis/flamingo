@@ -3,5 +3,11 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
 
-Flamingo.configure!(ARGV[0])
+begin
+  Flamingo.configure!(ARGV[0])
+rescue => e
+  $stderr.puts "Could not start: #{e.message}"
+  exit(-1)
+end
+
 Flamingo::Daemon::Flamingod.new.run()

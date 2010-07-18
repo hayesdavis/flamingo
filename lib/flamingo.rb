@@ -31,8 +31,10 @@ module Flamingo
   class << self
     
     def configure!(config_file=nil)
-      config_file ||= "#{FLAMINGO_ROOT}/config/flamingo.yml"
+      config_file = find_config_file(config_file)
       @config = Flamingo::Config.load(config_file)
+      validate_config!
+      logger.info "Loaded config file from #{config_file}"
     end
     
     def config
@@ -97,6 +99,24 @@ module Flamingo
       logger.formatter = Flamingo::Logging::Formatter.new
       logger
     end
+    
+    private
+      def validate_config!
+        unless config.username(nil) && config.password(nil)
+          raise "The config file must be YAML formatted and contain a username and password. See examples/flamingo.yml."
+        end
+      end
+      
+      def find_config_file(config_file=nil)
+        locations = [config_file,"./flamingo.yml","~/flamingo.yml"].compact.uniq
+        found = locations.find do |file|
+          file && File.exist?(file)
+        end
+        unless found
+          raise "No config file found in any of #{locations.join(",")}"
+        end
+        File.expand_path(found)
+      end
 
     def logger
       @logger ||= new_logger

@@ -5,7 +5,12 @@ require 'flamingo'
 
 include Flamingo
 
-Flamingo.configure!(ARGV[0])
+begin
+  Flamingo.configure!(ARGV[0])
+rescue => e
+  $stderr.puts "Could not start: #{e.message}"
+  exit(-1)
+end
 
 ARGV.clear # Remove args so IRB doesn't try to load them
 
