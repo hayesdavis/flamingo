@@ -44,7 +44,7 @@ module Flamingo
           end
           obj
         rescue => e
-          puts "error #{e}"
+          Flamingo.logger.error "error #{e}"
           nil
         end
     end    

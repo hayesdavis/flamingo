@@ -21,7 +21,7 @@ module Flamingo
       stream = Stream.get(params[:name])
       params.keys.each do |key|
         unless key.to_sym == :name
-          puts "Setting #{key} to #{params[key]}"
+          Flamingo.logger.info "Setting #{key} to #{params[key]}"
           stream.params[key] = params[key].split(",")
         end
       end
@@ -108,7 +108,7 @@ module Flamingo
       def change_predicates
         if options.respond_to?(:daemon_pid)
           Process.kill("USR1",options.daemon_pid)
-          puts "Rotating wader in daemon"
+          Flamingo.logger.info "Rotating wader in daemon"
         end
       end
   
