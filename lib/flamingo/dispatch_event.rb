@@ -17,7 +17,7 @@ module Flamingo
 #        Flamingo.logger.info Flamingo.router.destinations(type,event).inspect
         Subscription.all.each do |sub|
           Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
-          Flamingo.logger.info "Put job on subscription queue #{sub.name} for #{event_json}"
+          Flamingo.logger.debug "Put job on subscription queue #{sub.name} for #{event_json}"
         end
       end
       
