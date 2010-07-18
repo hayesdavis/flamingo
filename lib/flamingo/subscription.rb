@@ -25,14 +25,15 @@ module Flamingo
     end
     
     def save
+      Flamingo.logger.info("Adding #{name} to subscriptions")
       Flamingo.redis.sadd("subscriptions",name)
     end
     
     def delete
+      Flamingo.logger.info("Removing #{name} from subscriptions")
       Flamingo.redis.srem("subscriptions",name)
     end
     
   end
-  
   
 end
