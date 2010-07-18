@@ -96,6 +96,9 @@ module Flamingo
       end
 
       def run_as_daemon
+        # sorry ol' blue eyes
+        $stdout = File.new('/dev/null', 'w')
+
         pid = fork { run }
         write_pid_file(pid)
         Process.detach(pid)
