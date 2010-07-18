@@ -9,13 +9,11 @@ module Flamingo
       def run
         register_signal_handlers
         $0 = 'wader (flamingod)'
-        config = YAML.load(ERB.new(
-          IO.read("#{FLAMINGO_ROOT}/config/flamingo.yml")
-        ).result)
+        config = Flamingo.config
         
-        screen_name = config["username"]
-        password    = config["password"]
-        stream      = Stream.get(config["stream"])
+        screen_name = config.username
+        password    = config.password
+        stream      = Stream.get(config.stream)
         
         
         @wader = Flamingo::Wader.new(screen_name,password,stream)

@@ -1,4 +1,7 @@
+#!/usr/bin/env ruby
+
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
 
+Flamingo.configure!(ARGV[0])
 Flamingo::Daemon::Flamingod.new.run()

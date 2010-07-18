@@ -1,6 +1,7 @@
+#!/usr/bin/env ruby
+
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
-require 'irb'
 
 module Flamingo
   module DSL
@@ -22,4 +23,9 @@ end
 include Flamingo
 include Flamingo::DSL
 
+Flamingo.configure!(ARGV[0])
+
+ARGV.clear # Remove args so IRB doesn't try to load them
+
+require 'irb'
 IRB.start

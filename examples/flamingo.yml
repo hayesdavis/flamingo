@@ -1,0 +1,7 @@
+username: SCREEN_NAME
+password: PASSWORD
+stream: filter
+redis:
+  host: 0.0.0.0:6379
+server:
+  host: 0.0.0.0:4711

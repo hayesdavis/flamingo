@@ -9,6 +9,7 @@ require 'cgi'
 require 'active_support'
 require 'sinatra/base'
 
+require 'flamingo/config'
 require 'flamingo/dispatch_event'
 require 'flamingo/dispatch_error'
 require 'flamingo/stream_params'
@@ -29,6 +30,16 @@ FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
 module Flamingo
   
   class << self
+    
+    def configure!(config_file=nil)
+      config_file ||= "#{FLAMINGO_ROOT}/config/flamingo.yml"
+      @config = Flamingo::Config.load(config_file)
+    end
+    
+    def config
+      @config
+    end
+    
     # PHD: Lovingly borrowed from Resque
 
     # Accepts:
@@ -56,12 +67,15 @@ module Flamingo
     # create a new one.
     def redis
       return @redis if @redis
-      self.redis = 'localhost:6379'
+      self.redis = config.redis.host('localhost:6379')
       self.redis
     end
 
     def logger
-      @logger ||= Logger.new(File.join(FLAMINGO_ROOT,'log','flamingo.log'))
+      @logger ||= begin
+        log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
+        Logger.new(log_file)
+      end
     end
 
     def router
