@@ -70,14 +70,16 @@ module Flamingo
       self.redis
     end
 
+    def new_logger
+      log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
+      logger = Logger.new(log_file)
+      logger.level = Logger::INFO
+      logger.formatter = Flamingo::Logging::Formatter.new
+      logger
+    end
+
     def logger
-      @logger ||= begin
-        log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
-        logger = Logger.new(log_file)
-        logger.level = Logger::INFO
-        logger.formatter = Flamingo::Logging::Formatter.new
-        logger
-      end
+      @logger ||= new_logger
     end
 
   end 
