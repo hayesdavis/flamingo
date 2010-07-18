@@ -107,9 +107,9 @@ module Flamingo
       end
       
       def valid_logging_dest?(dest)
-        File.writable?(File.dirname(parent_dir))
-      end      
-    
+        File.writable?(File.dirname(parent_dest))
+      end
+
       def validate_config!
         unless config.username(nil) && config.password(nil)
           raise "The config file must be YAML formatted and contain a username and password. See examples/flamingo.yml."
