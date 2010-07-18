@@ -51,7 +51,7 @@ Getting Started
 
         $ ruby bin/flamingod
 
-5. View progress via logging
+5. View progress via logging (log location specified in config file)
 
         $ tail -f log/flamingo.log
 
