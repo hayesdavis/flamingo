@@ -17,8 +17,6 @@ require 'flamingo/stream_params'
 require 'flamingo/stream'
 require 'flamingo/subscription'
 require 'flamingo/wader'
-require 'flamingo/dispatcher/route'
-require 'flamingo/dispatcher/map'
 require 'flamingo/daemon/child_process'
 require 'flamingo/daemon/dispatcher_process'
 require 'flamingo/daemon/server_process'
@@ -81,12 +79,5 @@ module Flamingo
       end
     end
 
-    def router
-      unless @router
-        load "#{FLAMINGO_ROOT}/config/routes.rb"
-        @router = Flamingo::Dispatcher::Map.instance
-      end
-      @router
-    end
   end 
 end
