@@ -4,6 +4,14 @@ module Flamingo
     set :root, File.expand_path(File.dirname(__FILE__))
     set :static, true
     set :logging, true
+
+    get '/' do
+      content_type 'text/plain'
+      api = self.methods.select do |method|
+        (method =~ /^(GET|POST) /) && !(method =~ /png$/)
+      end
+      api.sort.join("\n")
+    end
     
     get '/streams/:name.json' do
       stream = Stream.get(params[:name])
