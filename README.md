@@ -26,7 +26,7 @@ Getting Started
 1. Install the gem
         sudo gem install flamingo
 
-2. Edit `config/flamingo.yml`
+2. Create a config file (see `examples/flamingo.yml`) with at least a username and password
 
         username: USERNAME
         password: PASSWORD
