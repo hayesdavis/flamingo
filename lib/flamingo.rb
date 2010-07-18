@@ -71,9 +71,29 @@ module Flamingo
     end
 
     def new_logger
-      log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
+
+      # determine log file location (default is FLAMINGO_ROOT/log/flamingo.log)
+      begin
+        if valid_logging_dest?(config.logging.dest)
+          log_file = config.logging.dest
+        else
+          raise :invalid_logging_dest
+        end
+      rescue
+        # default log file path
+        log_file = File.join(FLAMINGO_ROOT,'log','flamingo.log')
+      end
+
+      # determine logging level (default is Logger::INFO)
+      begin
+        log_level = Logger.const_get(config.logging.level.upcase)
+      rescue
+        log_level = Logger::INFO
+      end
+
+      # create logger facility
       logger = Logger.new(log_file)
-      logger.level = Logger::INFO
+      logger.level = log_level
       logger.formatter = Flamingo::Logging::Formatter.new
       logger
     end
@@ -81,6 +101,11 @@ module Flamingo
     def logger
       @logger ||= new_logger
     end
+
+    private
+      def valid_logging_dest?(dest)
+        File.writable?(File.dirname(parent_dir))
+      end
 
   end 
 end
