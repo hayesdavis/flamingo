@@ -3,25 +3,7 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
 
-module Flamingo
-  module DSL
-    def filters
-      Filter
-    end
-    
-    def reconnect
-      puts "Issuing reconnect to flamingod"
-      system("ruby #{FLAMINGO_ROOT}/bin/flamingod reconnect")
-    end
-    
-    def tail
-      puts "Not implemented. Soon though"
-    end
-  end
-end
-
 include Flamingo
-include Flamingo::DSL
 
 Flamingo.configure!(ARGV[0])
 
