@@ -69,7 +69,29 @@ module Flamingo
       self.redis = config.redis.host('localhost:6379')
       self.redis
     end
-    
+
+    def new_logger
+      # determine log file location (default is root_dir/log/flamingo.log)
+      if valid_logging_dest?(config.logging.dest(nil))
+        log_dest = config.logging.dest
+      else
+        log_dest = File.join(root_dir,'log','flamingo.log')
+      end
+
+      # determine logging level (default is Logger::INFO)
+      begin
+        log_level = Logger.const_get(config.logging.level.upcase)
+      rescue
+        log_level = Logger::INFO
+      end
+
+      # create logger facility
+      logger = Logger.new(log_dest)
+      logger.level = log_level
+      logger.formatter = Flamingo::Logging::Formatter.new
+      logger
+    end
+
     def logger
       @logger ||= new_logger
     end
@@ -107,9 +129,9 @@ module Flamingo
       end
       
       def valid_logging_dest?(dest)
-        File.writable?(File.dirname(parent_dir))
-      end      
-    
+        File.writable?(File.dirname(parent_dest))
+      end
+
       def validate_config!
         unless config.username(nil) && config.password(nil)
           raise "The config file must be YAML formatted and contain a username and password. See examples/flamingo.yml."
