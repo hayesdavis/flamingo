@@ -45,12 +45,12 @@ module Flamingo
     
     private
       def dispatch_event(event_json)
-        puts "Dispatched event"
+        Flamingo.logger.debug "Wader dispatched event"
         Resque.enqueue(Flamingo::DispatchEvent,event_json)
       end
       
       def dispatch_error(type,message,data={})
-        puts "Received error: #{message}"
+        Flamingo.logger.error "Received error: #{message}"
         Resque.enqueue(Flamingo::DispatchError,type,message,data)
       end
   end

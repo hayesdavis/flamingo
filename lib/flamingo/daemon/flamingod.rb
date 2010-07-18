@@ -46,7 +46,7 @@ module Flamingo
 
       def signal_children(sig)
         pids = (children.map {|c| c.pid}).join(",")
-        Flamingo.logger.info "Flamingod sending signal #{sig} to pids=#{pids}"
+        Flamingo.logger.info "Flamingod sending SIG#{sig} to pids=#{pids}"
         children.each {|child| child.signal(sig) }
       end
 

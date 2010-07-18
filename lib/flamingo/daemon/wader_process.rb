@@ -13,13 +13,11 @@ module Flamingo
         screen_name = config.username
         password    = config.password
         stream      = Stream.get(config.stream)
-        
-        
+
         @wader = Flamingo::Wader.new(screen_name,password,stream)
-        Flamingo.logger.info "Starting wader"
-        puts "Starting wader on #{Process.pid} under #{Process.ppid}"
+        Flamingo.logger.info "Starting wader on pid=#{Process.pid} under pid=#{Process.ppid}"
         @wader.run
-        puts "Wader stopped"
+        Flamingo.logger.info "Wader pid=#{Process.pid} stopped"
       end
       
       def stop

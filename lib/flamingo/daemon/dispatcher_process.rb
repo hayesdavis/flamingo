@@ -7,7 +7,7 @@ module Flamingo
           # Hack to get around resque insisting on setting the proces name
           $0 = "flamingod-dispatcher"
         end
-        puts "Starting dispatcher on #{Process.pid} under #{Process.ppid}"
+        Flamingo.logger.info "Starting dispatcher on pid=#{Process.pid} under pid=#{Process.ppid}"
         worker.work(1) # Wait 1s between jobs
       end
     end    
