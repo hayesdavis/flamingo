@@ -18,11 +18,11 @@ require 'flamingo/subscription'
 require 'flamingo/wader'
 require 'flamingo/daemon/child_process'
 require 'flamingo/daemon/dispatcher_process'
-require 'flamingo/daemon/server_process'
+require 'flamingo/daemon/web_server_process'
 require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
 require 'flamingo/logging/formatter'
-require 'flamingo/server'
+require 'flamingo/web/server'
 
 module Flamingo
   

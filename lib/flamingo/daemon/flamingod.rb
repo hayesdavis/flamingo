@@ -25,11 +25,11 @@ module Flamingo
         dispatcher
       end
 
-      def start_new_server
-        Flamingo.logger.info "Flamingod starting new server"
-        server = ServerProcess.new
-        server.start
-        server
+      def start_new_web_server
+        Flamingo.logger.info "Flamingod starting new web server"
+        ws = WebServerProcess.new
+        ws.start
+        ws
       end
 
       def trap_signals
@@ -57,14 +57,14 @@ module Flamingo
       end
 
       def children
-        [@wader,@server] + @dispatchers
+        [@wader,@web_server] + @dispatchers
       end
 
       def start_children
         Flamingo.logger.info "Flamingod starting children"
         @wader = start_new_wader
         @dispatchers = [start_new_dispatcher]
-        @server = start_new_server
+        @web_server = start_new_web_server
       end
 
       def wait_on_children()
@@ -73,8 +73,8 @@ module Flamingo
           unless exit_signaled?
             if @wader.pid == child_pid
               @wader = start_new_wader
-            elsif @server.pid == child_pid
-              @server = start_new_server
+            elsif @web_server.pid == child_pid
+              @web_server = start_new_web_server
             elsif (to_delete = @dispatchers.find{|d| d.pid == child_pid})
               @dispatchers.delete(to_delete)
               @dispatchers << start_new_dispatcher
