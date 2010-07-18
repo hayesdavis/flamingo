@@ -76,6 +76,7 @@ module Flamingo
       @logger ||= begin
         log_file = config.log{File.join(FLAMINGO_ROOT,'log','flamingo.log')}
         logger = Logger.new(log_file)
+        logger.level = Logger::INFO
         logger.formatter = Flamingo::Formatter.new
         logger
       end
