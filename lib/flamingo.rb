@@ -24,8 +24,6 @@ require 'flamingo/daemon/flamingod'
 require 'flamingo/logging/formatter'
 require 'flamingo/server'
 
-FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
-
 module Flamingo
   
   class << self
@@ -75,10 +73,14 @@ module Flamingo
     def logger
       @logger ||= new_logger
     end
-
+    
     private
+      def root_dir
+        File.expand_path(File.dirname(__FILE__)+'/..')
+      end
+    
       def new_logger
-        # determine log file location (default is FLAMINGO_ROOT/log/flamingo.log)
+        # determine log file location (default is root_dir/log/flamingo.log)
         begin
           if valid_logging_dest?(config.logging.dest)
             log_file = config.logging.dest
@@ -87,7 +89,7 @@ module Flamingo
           end
         rescue
           # default log file path
-          log_file = File.join(FLAMINGO_ROOT,'log','flamingo.log')
+          log_file = File.join(root_dir,'log','flamingo.log')
         end
   
         # determine logging level (default is Logger::INFO)
