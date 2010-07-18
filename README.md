@@ -34,16 +34,16 @@ Getting Started
 
         $ redis-server
 
-3. Start the Flamingo Daemon (`flamingod`)
-
-        $ ruby bin/flamingod
-
-4. Configure tracking using `flamingo` client
+3. Configure tracking using `flamingo` client
 
         $ ruby bin/flamingo
         >> s = Stream.get(:filter)
         >> s.params[:track] = %w(FOO BAR BAZ)
-        >> Subscription.new('YOUR_NAME').save
+        >> Subscription.new('YOUR_QUEUE').save
+
+4. Start the Flamingo Daemon (`flamingod`)
+
+        $ ruby bin/flamingod
 
 5. View progress via logging
 
@@ -54,3 +54,17 @@ Getting Started
         $ resque-web
         [...] Starting 'resque-web'...
         [...] 'resque-web' is already running at http://0.0.0.0:5678
+        
+7. Consume events with a resque worker
+
+        class HandleFlamingoEvent
+          
+          # type: One of "tweet" or "delete"
+          # event: a hash of the json data from twitter
+          def self.perform(type,event)
+            # Do stuff with the data
+          end
+          
+        end
+        
+        $ QUEUE=YOUR_QUEUE resque:work

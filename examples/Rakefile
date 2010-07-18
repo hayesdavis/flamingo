@@ -1,0 +1,15 @@
+# Simple example that reads from a subscription queue and writes the events 
+# to STDOUT
+# Usage (from this directory):
+#   $ QUEUE=YOUR_QUEUE rake resque:work
+
+require 'rubygems'
+require 'resque/tasks'
+
+class HandleFlamingoEvent
+  
+  def self.perform(type,event)
+    puts type, event
+  end
+  
+end
