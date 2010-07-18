@@ -29,12 +29,14 @@ module Flamingo
       end
       
       def trap_signals
+        trap("KILL") { terminate! }
         trap("TERM") { terminate! }
         trap("INT")  { terminate! }
         trap("USR1") { restart_wader }
       end
 
       def restart_wader
+        puts "Restarting wader"
         @wader.kill("INT")
       end
       
@@ -44,12 +46,12 @@ module Flamingo
       
       def terminate!
         puts "Terminating..."
-        self.exit_signaled = true
-        signal_children("TERM")
+        self.exit_signaled = true        
+        signal_children("INT")
       end
       
       def children
-        [@wader] + @dispatchers
+        [@wader,@server] + @dispatchers
       end
       
       def start_children
@@ -63,24 +65,21 @@ module Flamingo
           child_pid = Process.wait(-1)
           unless exit_signaled?
             if @wader.pid == child_pid
-              puts "Wader died"
               @wader = start_new_wader
             elsif @server.pid == child_pid
-              puts "Server died"
               @server = start_new_server
             elsif (to_delete = @dispatchers.find{|d| d.pid == child_pid})
               @dispatchers.delete(to_delete)
-              puts "Dispatcher #{child_pid} died"
               @dispatchers << start_new_dispatcher
             else
               puts "Received exit from unknown child #{child_pid}"
             end
           end
-        end  
-        puts "Exited"
+        end
       end
       
       def run
+        $0 = 'flamingod'
         trap_signals
         start_children
         wait_on_children

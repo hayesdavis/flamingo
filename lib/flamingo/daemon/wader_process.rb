@@ -2,7 +2,6 @@ module Flamingo
   module Daemon
     class WaderProcess < ChildProcess
       def register_signal_handlers
-        trap("TERM") { stop }
         trap("INT")  { stop }
       end
       
@@ -20,10 +19,10 @@ module Flamingo
         Flamingo.logger.info "Starting wader"
         puts "Starting wader on #{Process.pid} under #{Process.ppid}"
         @wader.run
+        puts "Wader stopped"
       end
       
       def stop
-        puts "Stopping wader on #{Process.pid}"
         @wader.stop
       end
     end
