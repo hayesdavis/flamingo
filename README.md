@@ -23,8 +23,10 @@ you are using Redis 1.x, you may want to swap it out.
 
 Getting Started
 ---------------
+1. Install the gem
+        sudo gem install flamingo
 
-1. Edit `config/flamingo.yml`
+2. Edit `config/flamingo.yml`
 
         username: USERNAME
         password: PASSWORD
@@ -36,32 +38,23 @@ Getting Started
     `LOGLEVEL` is one of the following:
     `DEBUG` < `INFO` < `WARN` < `ERROR` < `FATAL` < `UNKNOWN`
 
-2. Start the Redis server
+3. Start the Redis server
 
         $ redis-server
 
-3. Configure tracking using `flamingo` client
+4. Configure tracking using `flamingo` client (installed during `gem install`)
 
-        $ ruby bin/flamingo
+        $ flamingo
         >> s = Stream.get(:filter)
         >> s.params[:track] = %w(FOO BAR BAZ)
         >> Subscription.new('YOUR_QUEUE').save
 
-4. Start the Flamingo Daemon (`flamingod`)
+5. Start the Flamingo Daemon (`flamingod` installed during `gem install`)
 
-        $ ruby bin/flamingod
+        $ flamingod -c your/config/file.yml
 
-5. View progress via logging (log location specified in config file)
-
-        $ tail -f log/flamingo.log
-
-6. View progress via `resque-web`
-
-        $ resque-web
-        [...] Starting 'resque-web'...
-        [...] 'resque-web' is already running at http://0.0.0.0:5678
         
-7. Consume events with a resque worker
+6. Consume events with a resque worker
 
         class HandleFlamingoEvent
           
