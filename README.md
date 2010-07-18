@@ -67,4 +67,4 @@ Getting Started
           
         end
         
-        $ QUEUE=YOUR_QUEUE resque:work
+        $ QUEUE=YOUR_QUEUE rake resque:work
