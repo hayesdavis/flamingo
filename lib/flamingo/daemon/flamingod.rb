@@ -85,8 +85,19 @@ module Flamingo
         end
       end
 
+      def write_pid_file (pid)
+        begin
+          File.open(
+            Flamingo.config.pid_file("/dev/null"), "w"
+          ).write("#{pid}\n")
+        rescue
+          # do nothing
+        end
+      end
+
       def run_as_daemon
         pid = fork { run }
+        write_pid_file(pid)
         Process.detach(pid)
       end
 
