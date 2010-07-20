@@ -36,7 +36,9 @@ Getting Started
 1. Install the gem
         sudo gem install flamingo
 
-2. Create a config file (see `examples/flamingo.yml`) with at least a username and password
+2. Create a config file (see `examples/flamingo.yml`) with at least a username
+and password. You can store this in ~/flamingo.yml or specify it on the
+commandline (see below)
 
         username: SCREEN_NAME
         password: PASSWORD
@@ -60,14 +62,14 @@ Getting Started
 
 4. Configure tracking using `flamingo` client (installed during `gem install`)
 
-        $ flamingo
+        $ flamingo path/to/flamingo.yml
         >> s = Stream.get(:filter)
         >> s.params[:track] = %w(FOO BAR BAZ)
         >> Subscription.new('YOUR_QUEUE').save
 
 5. Start the Flamingo Daemon (`flamingod` installed during `gem install`)
 
-        $ flamingod -c your/config/file.yml
+        $ flamingod -c path/to/flamingo.yml
         
 6. Consume events with a resque worker.
 
