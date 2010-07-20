@@ -39,3 +39,4 @@ pkg
 ## PROJECT::SPECIFIC
 log
 config/flamingo.yml
+*.rdb
