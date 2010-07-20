@@ -2,6 +2,10 @@ Flamingo
 ========
 Flamingo is a resque-based system for handling the Twitter Streaming API.
 
+This is *early alpha* code. There will be a lot of change and things like tests 
+coming in the future. That said, it does work so give it a try if you have the 
+need.
+
 Dependencies
 ------------
 * redis
