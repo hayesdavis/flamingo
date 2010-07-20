@@ -9,6 +9,7 @@ require 'cgi'
 require 'active_support'
 require 'sinatra/base'
 
+require 'flamingo/version'
 require 'flamingo/config'
 require 'flamingo/dispatch_event'
 require 'flamingo/dispatch_error'
