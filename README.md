@@ -42,10 +42,15 @@ commandline (see below)
 
         username: SCREEN_NAME
         password: PASSWORD
+        
+        # should be "filter" or "sample", probably.
+        # Set the track terms for "filter" from the flamingo console (see README)
         stream:   filter
+        
         logging:
-          dest:   /path/to/your/flamingo.log
-          level:  INFO
+          dest:   /tmp/flamingo.log
+          level:  DEBUG
+
         redis:
           host:   0.0.0.0:6379
         web:
@@ -54,40 +59,68 @@ commandline (see below)
     `LOGLEVEL` is one of the following:
     `DEBUG` < `INFO` < `WARN` < `ERROR` < `FATAL` < `UNKNOWN`
 
-    TODO: OAuth instructions
-
-3. Start the Redis server
+3. Start the Redis server, and (optionally) open the resque web dashboard:
 
         $ redis-server
+        $ resque-web
 
-4. Configure tracking using `flamingo` client (installed during `gem install`)
+4. To set your tracking terms and start the queue subscription, jump into the `flamingo` client (installed during `gem install`):
 
         $ flamingo path/to/flamingo.yml
-        >> s = Stream.get(:filter)
-        >> s.params[:track] = %w(FOO BAR BAZ)
-        >> Subscription.new('YOUR_QUEUE').save
 
-5. Start the Flamingo Daemon (`flamingod` installed during `gem install`)
+5. This is a regular-old irb console, so anything ruby goes. First, register the terms you'd like to search on.  This doesn't have a direct effect: it just pokes the values into the database so that the wader knows what to listen for.
+
+        >> s = Stream.get(:filter)
+        >> s.params[:track] = ["@cheaptweet", "austin", "#etsy"]
+
+    For now, use those three actual terms -- they'll give you a nice, testable receipt rate that is neither too slow ('...is this thing on?') nor torrential (you can watch the sream from your terminal window).  Also note that you don't have to escape the tracking terms: twitter-stream will handle all that.
+
+6. Your second task from the flamingo console is to route the incoming tweets onto a queue -- in this case the EXAMPLE queue. This is used by the flamingod we'll start next but has no direct effect now.
+
+        >> Subscription.new('EXAMPLE').save
+
+7. Start the Flamingo Daemon (`flamingod` installed during `gem install`), and also start watching its log file:
 
         $ flamingod -c path/to/flamingo.yml
+        $ tail -f /tmp/flamingo.log
+
+    If things go well, you'll see something like
+
+        [2010-07-20 05:58:07, INFO] - Loaded config file from flamingo.yml
+        [2010-07-20 05:58:07, INFO] - Flamingod starting children
+        [2010-07-20 05:58:07, INFO] - Flamingod starting new wader
+        [2010-07-20 05:58:07, INFO] - Flamingod starting new dispatcher
+        [2010-07-20 05:58:07, INFO] - Flamingod starting new web server
+        [2010-07-20 05:58:07, INFO] - Starting wader on pid=91008 under pid=91003
+        [2010-07-20 05:58:07, INFO] - Starting dispatcher on pid=91009 under pid=91003
+        [2010-07-20 05:58:12, INFO] - Listening on stream: /1/statuses/filter.json?track=%23etsy,austin,cheaptweet
+        ... short initial delay ....
+        [2010-07-20 05:58:42, DEBUG] - Wader dispatched event
+        [2010-07-20 05:58:42, DEBUG] - Put job on subscription queue EXAMPLE for {"text":If you ever visit Austin make sure to go to Torchy's Tacos",...
+
+    On the resque-web dashboard, you should see a queue come up called EXAMPLE, with jobs accruing. There will only be 0 of 0 workers working: let's fix that
         
-6. Consume events with a resque worker.
+8. You'll consume those events with a resque worker, something like the following but more audacious:
 
         class HandleFlamingoEvent
-          
           # type: One of "tweet" or "delete"
           # event: a hash of the json data from twitter
           def self.perform(type,event)
-            # Do stuff with the data
+            # Do stuff with the data, probably something more interesting than this:
+            puts [type, event].inspect
           end
-          
         end
 
-6. Start the worker task (see `examples/Rakefile`):
+9. Start the worker task (see `examples/Rakefile`):
         
-        $ QUEUE=YOUR_QUEUE rake resque:work
+        $ QUEUE=EXAMPLE rake -t examples/Rakefile resque:work
+
+   Two things should now happen:
+   * The pent-up jobs from the EXAMPLE queue should spray across your console
+   * The resque dashboard should show the queue being emptied as a result 
 
 
+   
 Overview
 --------
 
@@ -121,6 +154,14 @@ This is the part you write. These are standard resque workers, living on one or
 many machines, doing anything that your heart can imagine and your fingers can
 code.
 
+
+TODO
+-----
+
+* OAuth instructions
+* `kill -USR1 xxxx` acts funny -- things restart but not as we'd like
+
+    
 
 Flamingo
 --------

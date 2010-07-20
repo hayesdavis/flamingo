@@ -1,15 +1,17 @@
-# Simple example that reads from a subscription queue and writes the events 
-# to STDOUT
+#
+# Simple example: reads from a subscription queue, writes the events to STDOUT
+#
 # Usage (from this directory):
-#   $ QUEUE=YOUR_QUEUE rake resque:work
+#   $ QUEUE=EXAMPLES rake -f examples/Rakefile resque:work
 
 require 'rubygems'
 require 'resque/tasks'
 
 class HandleFlamingoEvent
-  
-  def self.perform(type,event)
-    puts type, event
+  # type: One of "tweet" or "delete"
+  # event: a hash of the json data from twitter
+  def self.perform(type, event)
+    # Do stuff with the data, probably something more interesting than this:
+    puts [type, event].inspect
   end
-  
 end
