@@ -5,6 +5,8 @@ require 'flamingo'
 
 include Flamingo
 
+puts "Flamingo client #{Flamingo::VERSION}"
+
 begin
   Flamingo.configure!(ARGV[0])
 rescue => e
