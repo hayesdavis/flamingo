@@ -14,9 +14,9 @@ TAGS*
 tmtags
 *_flymake.*
 *.tmproj
+.loadpath
 .project
 .settings
-.loadpath
 
 ## COMPILED
 a.out

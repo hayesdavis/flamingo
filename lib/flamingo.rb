@@ -9,28 +9,37 @@ require 'cgi'
 require 'active_support'
 require 'sinatra/base'
 
+require 'flamingo/version'
+require 'flamingo/config'
 require 'flamingo/dispatch_event'
 require 'flamingo/dispatch_error'
 require 'flamingo/stream_params'
 require 'flamingo/stream'
 require 'flamingo/subscription'
 require 'flamingo/wader'
-require 'flamingo/dispatcher/route'
-require 'flamingo/dispatcher/map'
+require 'flamingo/daemon/pid_file'
 require 'flamingo/daemon/child_process'
 require 'flamingo/daemon/dispatcher_process'
-require 'flamingo/daemon/server_process'
+require 'flamingo/daemon/web_server_process'
 require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
-require 'flamingo/server'
-
-FLAMINGO_ROOT = File.expand_path(File.dirname(__FILE__)+'/..')
+require 'flamingo/logging/formatter'
+require 'flamingo/web/server'
 
 module Flamingo
-  CONFIG_FILE = File.expand_path("#{FLAMINGO_ROOT}/config/flamingo.yml") unless defined?(Flamingo::CONFIG_FILE)
-  raise "Please create a configuration file in #{CONFIG_FILE}" unless File.exists?(CONFIG_FILE)
-
   class << self
+
+    def configure!(config_file=nil)
+      config_file = find_config_file(config_file)
+      @config = Flamingo::Config.load(config_file)
+      validate_config!
+      logger.info "Loaded config file from #{config_file}"
+    end
+
+    def config
+      @config
+    end
+
     # PHD: Lovingly borrowed from Resque
 
     # Accepts:
@@ -50,7 +59,7 @@ module Flamingo
       when Redis::Namespace
         @redis = server
       else
-        raise "I don't know what to do with #{server.inspect}"
+        raise "Invalid redis configuration: #{server.inspect}"
       end
     end
 
@@ -58,20 +67,84 @@ module Flamingo
     # create a new one.
     def redis
       return @redis if @redis
-      self.redis = 'localhost:6379'
+      self.redis = config.redis.host('localhost:6379')
       self.redis
     end
 
-    def logger
-      @logger ||= Logger.new(File.join(FLAMINGO_ROOT,'log','flamingo.log'))
+    def new_logger
+      # determine log file location (default is root_dir/log/flamingo.log)
+      if valid_logging_dest?(config.logging.dest(nil))
+        log_dest = config.logging.dest
+      else
+        log_dest = File.join(root_dir,'log','flamingo.log')
+      end
+
+      # determine logging level (default is Logger::INFO)
+      begin
+        log_level = Logger.const_get(config.logging.level.upcase)
+      rescue
+        log_level = Logger::INFO
+      end
+
+      # create logger facility
+      logger = Logger.new(log_dest)
+      logger.level = log_level
+      logger.formatter = Flamingo::Logging::Formatter.new
+      logger
     end
 
-    def router
-      unless @router
-        load "#{FLAMINGO_ROOT}/config/routes.rb"
-        @router = Flamingo::Dispatcher::Map.instance
-      end
-      @router
+    def logger
+      @logger ||= new_logger
     end
+
+    private
+      def root_dir
+        File.expand_path(File.dirname(__FILE__)+'/..')
+      end
+
+      def new_logger
+        dest = config.logging.dest(nil)
+        if valid_logging_dest?(dest)
+          log_file = dest
+        else
+          log_file = File.join(root_dir,'log','flamingo.log')
+        end
+
+        # determine logging level (default is Logger::INFO)
+        begin
+          log_level = Logger.const_get(config.logging.level('INFO').upcase)
+        rescue
+          log_level = Logger::INFO
+        end
+
+        # create logger facility
+        logger = Logger.new(log_file)
+        logger.level = log_level
+        logger.formatter = Flamingo::Logging::Formatter.new
+        logger
+      end
+
+      def valid_logging_dest?(dest)
+        return false unless dest
+        File.writable?(File.dirname(dest))
+      end
+
+      def validate_config!
+        unless config.username(nil) && config.password(nil)
+          raise "The config file must be YAML formatted and contain a username and password. See examples/flamingo.yml."
+        end
+      end
+
+      def find_config_file(config_file=nil)
+        locations = [config_file,"./flamingo.yml","~/flamingo.yml"].compact.uniq
+        found = locations.find do |file|
+          file && File.exist?(file)
+        end
+        unless found
+          raise "No config file found in any of #{locations.join(",")}"
+        end
+        File.expand_path(found)
+      end
+
   end
 end

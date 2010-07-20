@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
+require 'flamingo'
+
+Flamingo.configure!(ARGV[0])
+host,port = Flamingo.config.web.host('0.0.0.0:4711').split(":")
+Flamingo::Web::Server.run! :host=>host, :port=>port.to_i

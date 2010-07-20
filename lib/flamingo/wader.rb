@@ -1,6 +1,6 @@
 module Flamingo
   class Wader
-    attr_accessor :screen_name, :password, :keep_running, :stream, :connection
+    attr_accessor :screen_name, :password, :stream, :connection
 
     def initialize(screen_name,password,stream)
       self.screen_name = screen_name
@@ -16,7 +16,6 @@ module Flamingo
     #   dispatch each for later handling
     #
     def run
-      self.keep_running = true
       EventMachine::run do
         self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
         Flamingo.logger.info("Listening on stream: #{stream.path}")
@@ -46,31 +45,19 @@ module Flamingo
     end
 
     def stop
-      self.keep_running = false
+      connection.stop
+      EM.stop
     end
 
     private
-      # Handles a stream event:
-      #   Push it into the Queue
       def dispatch_event(event_json)
-        Resque.enqueue(Flamingo::DispatchEvent, event_json)
-        stop_if_needed
+        Flamingo.logger.debug "Wader dispatched event"
+        Resque.enqueue(Flamingo::DispatchEvent,event_json)
       end
 
-      # Handles a stream error:
-      #   Push it into the Queue
-      def dispatch_error(type, message, data={})
-        Resque.enqueue(Flamingo::DispatchError, type, message, data)
-        # Flamingo.logger.debug("Wader error: #{type} #{message}")
-        stop_if_needed
-      end
-
-      def stop_if_needed
-        unless keep_running
-          Flamingo.logger.info("Wader terminating gracefully")
-          connection.stop
-          EM.stop
-        end
+      def dispatch_error(type,message,data={})
+        Flamingo.logger.error "Received error: #{message}"
+        Resque.enqueue(Flamingo::DispatchError,type,message,data)
       end
   end
 end

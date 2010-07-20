@@ -1,0 +1,10 @@
+username: SCREEN_NAME
+password: PASSWORD
+stream: filter
+logging:
+  dest: /your/log/file/here.log
+  level: INFO
+redis:
+  host: 0.0.0.0:6379
+web:
+  host: 0.0.0.0:4711
