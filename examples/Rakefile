@@ -8,10 +8,15 @@ require 'rubygems'
 require 'resque/tasks'
 
 class HandleFlamingoEvent
+
+  #
   # type: One of "tweet" or "delete"
   # event: a hash of the json data from twitter
+  #
+  #def self.perform(type, event_info, event)
   def self.perform(type, event)
     # Do stuff with the data, probably something more interesting than this:
     puts [type, event].inspect
   end
+
 end
