@@ -125,6 +125,4 @@ Flamingo
 
 Here is a photo of a flamingo:
 
-!http://farm4.static.flickr.com/3438/3302580937_0ec540b73e_z_d.jpg!
-
-Flamingo Photo by "William Warby, CC-BY License":http://www.flickr.com/photos/wwarby/3302580937 :: photo taken 21 Feb 2009 in Dagnall, England.
+![Flamingo!](http://farm4.static.flickr.com/3438/3302580937_0ec540b73e_z_d.jpg "Flamingo Photo by "William Warby, CC-BY License":http://www.flickr.com/photos/wwarby/3302580937 :: photo taken 21 Feb 2009 in Dagnall, England.")
