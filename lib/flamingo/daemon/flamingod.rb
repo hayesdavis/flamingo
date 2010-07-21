@@ -1,5 +1,20 @@
 module Flamingo
   module Daemon
+    #
+    # Flamingod is the main overseer of the Flamingo flock.
+    #
+    # Starts three sets of children:
+    #
+    # * A wader process: initiates stream request, pushes each response into the queue
+    # * A Sinatra server: lightweight responder to create and manage subscriptions
+    # * A set of dispatchers: worker processes that handle each stream response.
+    #
+    # You can control the flamingod with the following signals:
+    #
+    # * TERM and INT will kill the flamingod parent process, and signal each
+    #   child with TERM
+    # * USR1 will restart the wader gracefully.
+    #
     class Flamingod
       
       # For process-scoping of traps
@@ -70,6 +85,10 @@ module Flamingo
         @web_server = start_new_web_server
       end
 
+      #
+      # Unless signaled externally, waits in an endless loop. If any child
+      # process terminates, it restarts that process.
+      # TODO Needs intelligent behavior so we don't get endless loops
       def wait_on_children()
         until exit_signaled?
           child_pid = Process.wait(-1)

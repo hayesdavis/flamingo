@@ -1,10 +1,22 @@
-username: SCREEN_NAME
-password: PASSWORD
-stream: filter
+username:       SCREEN_NAME
+password:       PASSWORD
+
+# either "filter" or "sample"
+# For filter, set the terms to track in the flamingo console (see README.md)
+stream:         filter
+
+# Point the logs where you like.
+# Should change the log level from DEBUG to INFO before you deploy: allowed levels are
+#    DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN
 logging:
-  dest: /your/log/file/here.log
-  level: INFO
+  dest:         /tmp/flamingo.log
+  level:        DEBUG
+
+# Where is the redis server the flamingod processes should connect to?
 redis:
-  host: 0.0.0.0:6379
+  host:         0.0.0.0:6379
+
+# What port and interface should the flamingod web_server listen on?
+# use 0.0.0.0 for all interfaces, 127.0.0.1 to listen on only localhost
 web:
-  host: 0.0.0.0:4711
+  host:         0.0.0.0:4711

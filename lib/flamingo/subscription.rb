@@ -1,9 +1,9 @@
 module Flamingo
-  
+  #
+  # Track stream subscriptions in the Redis db.
+  #
   class Subscription
-    
     class << self
-      
       def all
         Flamingo.redis.smembers("subscriptions").map do |name|
           new(name)
@@ -15,25 +15,22 @@ module Flamingo
           Subscription.new(name)
         end
       end
-      
     end
-    
+
     attr_accessor :name
-        
     def initialize(name)
-      self.name = name  
+      self.name = name
     end
-    
+
     def save
       Flamingo.logger.info("Adding #{name} to subscriptions")
       Flamingo.redis.sadd("subscriptions",name)
     end
-    
+
     def delete
       Flamingo.logger.info("Removing #{name} from subscriptions")
       Flamingo.redis.srem("subscriptions",name)
     end
-    
+
   end
-  
 end
