@@ -17,7 +17,10 @@ module Flamingo
     # * USR1 will restart the wader gracefully.
     #
     class Flamingod
-
+      
+      # For process-scoping of traps
+      include TrapKeeper
+      
       def exit_signaled?
         @exit_signaled
       end

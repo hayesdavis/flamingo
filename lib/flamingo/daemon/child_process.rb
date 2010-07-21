@@ -1,6 +1,10 @@
 module Flamingo
   module Daemon
     class ChildProcess
+      
+      # For process-scoping of traps
+      include TrapKeeper
+      
       attr_accessor :pid
   
       def kill(sig)
