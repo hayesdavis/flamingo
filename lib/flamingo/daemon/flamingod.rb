@@ -1,7 +1,10 @@
 module Flamingo
   module Daemon
     class Flamingod
-
+      
+      # For process-scoping of traps
+      include TrapKeeper
+      
       def exit_signaled?
         @exit_signaled
       end
