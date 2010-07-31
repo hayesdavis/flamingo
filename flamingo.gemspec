@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency "twitter-stream",  ">= 0.1.4"
   s.add_dependency "yajl-ruby",       ">= 0.6.7"
   s.add_dependency "activesupport",   ">= 2.1.0"
+  
+  s.add_development_dependency "mockingbird", ">= 0.1.0"
 
   s.description = <<-description
     Flamingo makes it easy to wade through the Twitter Streaming API by 
