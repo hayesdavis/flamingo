@@ -37,9 +37,12 @@ module Flamingo
 
         connection.on_max_reconnects do |timeout, retries|
           dispatch_error(:fatal,
-            "Failed to reconnect after #{retries} retries",
-            {:timeout=>timeout,:retries=>retries}
+            "Failed to reconnect after #{retries-1} retries",
+            {:retries=>retries-1}
           )
+          # Have to give up at this point
+          Flamingo.logger.error "Stopping wader due to max reconnect attempts"
+          stop
         end
       end
     end
