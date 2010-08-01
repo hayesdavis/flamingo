@@ -2,10 +2,7 @@ require "#{File.dirname(__FILE__)}/helper"
 
 class TestAuthentication < Test::Unit::TestCase
   
-  def setup
-    Flamingo.config = Flamingo::Config.new
-    Flamingo.logger = Logger.new("/dev/null")
-  end
+  include WaderTest
   
   def test_unauthorized_is_fatal
     run_test_for_status_code(401,"Unauthorized",

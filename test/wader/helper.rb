@@ -28,3 +28,10 @@ module Resque
   end
   
 end
+
+module WaderTest
+  def setup
+    Flamingo.config = Flamingo::Config.new
+    Flamingo.logger = Logger.new("/dev/null")
+  end  
+end

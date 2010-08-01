@@ -1,20 +1,24 @@
 module Flamingo
   module Daemon
     class WaderProcess < ChildProcess
-      
+
+      # Exit codes
       EXIT_CLEAN = 0
 
+      # Non-fatal exit code - For transient network errors where a retry is 
+      # likely to resolve the probelm
+      EXIT_MAX_RECONNECTS = 001
+
+      # 1XX is a fatal exit code - Human intervention or a configuration change 
+      # is necessary to get the wader started
       EXIT_FATAL_RANGE    = 100..199
       EXIT_AUTHENTICATION = 100
-      EXIT_INVALID_PARAMS = 101
-      EXIT_UNKNOWN_STREAM = 102
-
+      EXIT_UNKNOWN_STREAM = 101
+      EXIT_INVALID_PARAMS = 102
       
       class << self
         def fatal_exit?(status)
-          if status
-            EXIT_FATAL_RANGE.include?(status.exitstatus)
-          end
+          status && EXIT_FATAL_RANGE.include?(status.exitstatus)
         end
       end
       
@@ -30,6 +34,8 @@ module Flamingo
         screen_name = config.username
         password    = config.password
         stream      = Stream.get(config.stream)
+        
+        
 
         @wader = Flamingo::Wader.new(screen_name,password,stream)
         Flamingo.logger.info "Starting wader on pid=#{Process.pid} under pid=#{Process.ppid}"
@@ -43,6 +49,8 @@ module Flamingo
           exit_code = EXIT_UNKNOWN_STREAM
         rescue Flamingo::Wader::InvalidParametersError
           exit_code = EXIT_INVALID_PARAMS
+        rescue Flamingo::Wader::MaxReconnectsExceededError
+          exit_code = EXIT_MAX_RECONNECTS
         end
         Flamingo.logger.info "Wader pid=#{Process.pid} stopped with code #{exit_code}"
         exit(exit_code)

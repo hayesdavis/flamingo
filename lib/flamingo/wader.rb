@@ -1,10 +1,10 @@
 module Flamingo
   class Wader
     
-    class FatalError < StandardError      
+    class WaderError < StandardError 
     end
-    
-    class FatalHttpStatusError < FatalError
+
+    class HttpStatusError < WaderError
       
       attr_accessor :code
       
@@ -13,10 +13,14 @@ module Flamingo
         self.code = code
       end
     end
+
+    # Errors from certain HTTP Statuses
+    class AuthenticationError < HttpStatusError; end
+    class UnknownStreamError < HttpStatusError; end
+    class InvalidParametersError < HttpStatusError; end
     
-    class AuthenticationError < FatalHttpStatusError; end
-    class UnknownStreamError < FatalHttpStatusError; end
-    class InvalidParametersError < FatalHttpStatusError; end
+    # Fatal error from too many reconnection attempts
+    class MaxReconnectsExceededError < WaderError; end
     
     attr_accessor :screen_name, :password, :stream, :connection
 
@@ -63,13 +67,9 @@ module Flamingo
         end
 
         connection.on_max_reconnects do |timeout, retries|
-          dispatch_error(:fatal,
-            "Failed to reconnect after #{retries-1} retries",
-            {:retries=>retries-1}
-          )
-          # Have to give up at this point
-          Flamingo.logger.error "Stopping wader due to max reconnect attempts"
-          stop
+          stop_and_raise!(MaxReconnectsExceededError.new(
+            "Failed to reconnect after #{retries-1} retries"
+          ))
         end
       end
       raise @error if @error
