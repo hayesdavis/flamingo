@@ -35,3 +35,13 @@ module WaderTest
     Flamingo.logger = Logger.new("/dev/null")
   end  
 end
+
+# Make reconnects move faster
+class Twitter::JSONStream
+  NF_RECONNECT_START  = 0
+  NF_RECONNECT_ADD    = 0
+  RETRIES_MAX         = 1
+  
+  AF_RECONNECT_START  = 0
+  AF_RECONNECT_MUL    = 1
+end

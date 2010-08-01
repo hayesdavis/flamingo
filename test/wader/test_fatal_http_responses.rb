@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helper"
 
-class TestAuthentication < Test::Unit::TestCase
+class TestFatalHttpResponses < Test::Unit::TestCase
   
   include WaderTest
   
@@ -56,6 +56,7 @@ class TestAuthentication < Test::Unit::TestCase
         assert_equal(code,e.code)
       end
       
+      assert_equal(0,wader.retries,"No retry attempts should be made")
       assert_not_nil(error)
       
     ensure

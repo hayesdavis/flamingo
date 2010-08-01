@@ -39,7 +39,7 @@ class TestReconnections < Test::Unit::TestCase
       wader.run
     end
     
-    assert_equal(10,wader.retries)
+    assert_equal(Twitter::JSONStream::RETRIES_MAX,wader.retries)
     assert_equal(10,job_count,"Should have dispatched 10 jobs")
     
   ensure

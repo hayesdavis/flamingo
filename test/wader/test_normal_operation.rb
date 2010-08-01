@@ -19,9 +19,9 @@ class TestNormalOperation < Test::Unit::TestCase
       if type == Flamingo::DispatchEvent
         event_count += 1
         if event_count == expected_count
-          # Wait 3 seconds before stopping in case we get more events from the 
+          # Wait a second before stopping in case we get more events from the 
           # server, which would be an error
-          EM.add_timer(3) { wader.stop }
+          EM.add_timer(1) { wader.stop }
         end
       else
         fail("Should only receive events, not errors")

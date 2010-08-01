@@ -34,8 +34,6 @@ module Flamingo
         screen_name = config.username
         password    = config.password
         stream      = Stream.get(config.stream)
-        
-        
 
         @wader = Flamingo::Wader.new(screen_name,password,stream)
         Flamingo.logger.info "Starting wader on pid=#{Process.pid} under pid=#{Process.ppid}"
@@ -52,7 +50,7 @@ module Flamingo
         rescue Flamingo::Wader::MaxReconnectsExceededError
           exit_code = EXIT_MAX_RECONNECTS
         end
-        Flamingo.logger.info "Wader pid=#{Process.pid} stopped with code #{exit_code}"
+        Flamingo.logger.info "Wader pid=#{Process.pid} exited with code #{exit_code}"
         exit(exit_code)
       end
       

@@ -47,16 +47,7 @@ module Flamingo
         end
 
         connection.on_error do |message|
-          code = connection.code
-          if [401,403].include?(code)
-            stop_and_raise!(AuthenticationError.new(message,code))
-          elsif code == 404
-            stop_and_raise!(UnknownStreamError.new(message,code))
-          elsif [406,413,416].include?(code)
-            stop_and_raise!(InvalidParametersError.new(message,code))
-          else
-            dispatch_error(:generic,message)
-          end
+          handle_connection_error(message)
         end
 
         connection.on_reconnect do |timeout, retries|
@@ -74,16 +65,48 @@ module Flamingo
     end
     
     def retries
-      connection ? (connection.reconnect_retries - 1) : 0
+      if connection
+        # This is weird but necessary because twitter-stream increments the 
+        # reconnect_retries a bit oddly. They are incremented prior to the 
+        # actual reconnect which means that the last reconnect_retries value 
+        # is 1 more than the real value.
+        rs = connection.reconnect_retries
+        rs == 0 ? 0 : rs - 1
+      else
+        0
+      end
     end
 
     def stop
-      connection.stop
+      if connection
+        connection.stop
+      end
       EM.stop
     end
 
     private
+      # Decides what to do with specific connection errors. For explanations 
+      # of various HTTP status codes from the Streaming API, see:
+      # http://dev.twitter.com/pages/streaming_api_response_codes
+      def handle_connection_error(message)
+        code = connection.code # HTTP status code
+        if [401,403].include?(code)
+          stop_and_raise!(AuthenticationError.new(message,code))
+        elsif code == 404
+          stop_and_raise!(UnknownStreamError.new(message,code))
+        elsif [406,413,416].include?(code)
+          stop_and_raise!(InvalidParametersError.new(message,code))
+        elsif code && code > 0
+          Flamingo.logger.warn "Received non-fatal HTTP status #{code} with "+
+            "message \"#{message}\". Will retry."
+        else
+          Flamingo.logger.warn "Unknown connection error: #{message}. "+
+            "Will retry." 
+        end        
+      end
+      
       def stop_and_raise!(error)
+        Flamingo.logger.error "Stopping wader due to error: #{error}"
         stop
         @error = error
       end
@@ -91,11 +114,6 @@ module Flamingo
       def dispatch_event(event_json)
         Flamingo.logger.debug "Wader dispatched event"
         Resque.enqueue(Flamingo::DispatchEvent, event_json)
-      end
-
-      def dispatch_error(type,message,data={})
-        Flamingo.logger.error "Received error: #{message}"
-        Resque.enqueue(Flamingo::DispatchError, type, message, data)
       end
 
   end
