@@ -58,14 +58,25 @@ module Flamingo
       end
 
       def restart_wader
-        Flamingo.logger.info "Flamingod restarting wader pid=#{@wader.pid} with SIGINT"
-        @wader.kill("INT")
+        if @wader
+          Flamingo.logger.info "Flamingod restarting wader pid=#{@wader.pid} with SIGINT"
+          @wader.kill("INT")
+        else
+          Flamingo.logger.info "Wader is not started. Attempting to start new wader."
+          @wader = start_new_wader
+        end
       end
 
       def signal_children(sig)
         pids = (children.map {|c| c.pid}).join(",")
         Flamingo.logger.info "Flamingod sending SIG#{sig} to pids=#{pids}"
-        children.each {|child| child.signal(sig) }
+        children.each do |child|
+          begin
+            child.signal(sig)
+          rescue => e
+            Flamingo.logger.info "Failure sending SIG#{sig} to child #{child.pid}: #{e}"
+          end
+        end
       end
 
       def terminate!
@@ -75,7 +86,7 @@ module Flamingo
       end
 
       def children
-        [@wader,@web_server] + @dispatchers
+        ([@wader,@web_server] + @dispatchers).compact
       end
 
       def start_children
@@ -92,9 +103,10 @@ module Flamingo
       def wait_on_children()
         until exit_signaled?
           child_pid = Process.wait(-1)
+          child_status = $?
           unless exit_signaled?
-            if @wader.pid == child_pid
-              @wader = start_new_wader
+            if @wader && @wader.pid == child_pid
+              handle_wader_exit(child_status)
             elsif @web_server.pid == child_pid
               @web_server = start_new_web_server
             elsif (to_delete = @dispatchers.find{|d| d.pid == child_pid})
@@ -104,6 +116,17 @@ module Flamingo
               Flamingo.logger.info "Received exit from unknown child #{child_pid}"
             end
           end
+        end
+      end
+      
+      def handle_wader_exit(status)
+        if WaderProcess.fatal_exit?(status)
+          Flamingo.logger.error "Wader exited with status "+
+            "#{status.exitstatus} and cannot be automatically restarted"
+          $stderr.write("Wader exited with fatal error. Check the the log.")
+          terminate!
+        else
+          @wader = start_new_wader
         end
       end
 

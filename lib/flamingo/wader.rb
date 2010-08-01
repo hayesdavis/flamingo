@@ -1,5 +1,23 @@
 module Flamingo
   class Wader
+    
+    class FatalError < StandardError      
+    end
+    
+    class FatalHttpStatusError < FatalError
+      
+      attr_accessor :code
+      
+      def initialize(message,code)
+        super(message)  
+        self.code = code
+      end
+    end
+    
+    class AuthenticationError < FatalHttpStatusError; end
+    class UnknownStreamError < FatalHttpStatusError; end
+    class InvalidParametersError < FatalHttpStatusError; end
+    
     attr_accessor :screen_name, :password, :stream, :connection
 
     def initialize(screen_name,password,stream)
@@ -25,7 +43,16 @@ module Flamingo
         end
 
         connection.on_error do |message|
-          dispatch_error(:generic,message)
+          code = connection.code
+          if [401,403].include?(code)
+            stop_and_raise!(AuthenticationError.new(message,code))
+          elsif code == 404
+            stop_and_raise!(UnknownStreamError.new(message,code))
+          elsif [406,413,416].include?(code)
+            stop_and_raise!(InvalidParametersError.new(message,code))
+          else
+            dispatch_error(:generic,message)
+          end
         end
 
         connection.on_reconnect do |timeout, retries|
@@ -45,6 +72,7 @@ module Flamingo
           stop
         end
       end
+      raise @error if @error
     end
 
     def stop
@@ -53,15 +81,20 @@ module Flamingo
     end
 
     private
+      def stop_and_raise!(error)
+        stop
+        @error = error
+      end
+      
       def dispatch_event(event_json)
         Flamingo.logger.debug "Wader dispatched event"
         Resque.enqueue(Flamingo::DispatchEvent, event_json)
-        # Resque.enqueue(Flamingo::DispatchEvent, {:src => "flamingo:#{stream.name}"}, event_json)
       end
 
       def dispatch_error(type,message,data={})
         Flamingo.logger.error "Received error: #{message}"
         Resque.enqueue(Flamingo::DispatchError, type, message, data)
       end
+
   end
 end
