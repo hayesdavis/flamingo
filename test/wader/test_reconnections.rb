@@ -34,11 +34,12 @@ class TestReconnections < Test::Unit::TestCase
     
     assert_raise(
       Flamingo::Wader::MaxReconnectsExceededError,
-      "Expected a max reconnects error to be raise by run"
+      "Expected a max reconnects error to be raised by run"
     ) do
       wader.run
     end
     
+    assert_equal(10,wader.retries)
     assert_equal(10,job_count,"Should have dispatched 10 jobs")
     
   ensure

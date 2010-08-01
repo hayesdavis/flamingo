@@ -60,10 +60,8 @@ module Flamingo
         end
 
         connection.on_reconnect do |timeout, retries|
-          dispatch_error(:reconnection,
-            "Will reconnect after #{timeout}. Retry \##{retries}",
-            {:timeout=>timeout,:retries=>retries}
-          )
+          Flamingo.logger.warn "Failed to connect. Will reconnect after "+
+            "#{timeout}. Retry \##{retries}"
         end
 
         connection.on_max_reconnects do |timeout, retries|
@@ -73,6 +71,10 @@ module Flamingo
         end
       end
       raise @error if @error
+    end
+    
+    def retries
+      connection ? (connection.reconnect_retries - 1) : 0
     end
 
     def stop
