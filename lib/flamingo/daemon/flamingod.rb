@@ -71,10 +71,12 @@ module Flamingo
         pids = (children.map {|c| c.pid}).join(",")
         Flamingo.logger.info "Flamingod sending SIG#{sig} to pids=#{pids}"
         children.each do |child|
-          begin
-            child.signal(sig)
-          rescue => e
-            Flamingo.logger.info "Failure sending SIG#{sig} to child #{child.pid}: #{e}"
+          if child.running?
+            begin
+              child.signal(sig)
+            rescue => e
+              Flamingo.logger.info "Failure sending SIG#{sig} to child #{child.pid}: #{e}"
+            end
           end
         end
       end
