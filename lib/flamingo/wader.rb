@@ -90,7 +90,7 @@ module Flamingo
     private
       def connect_and_run
         EventMachine::run do
-          self.connection = stream.connect(:auth=>"#{screen_name}:#{password}",:host=>'0.0.0.0',:port=>'8080')
+          self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
           Flamingo.logger.info("Listening on stream: #{stream.path}")
   
           connection.each_item do |event_json|
