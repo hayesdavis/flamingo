@@ -21,13 +21,21 @@ module Flamingo
     
     # Fatal error from too many reconnection attempts
     class MaxReconnectsExceededError < WaderError; end
+      
+    # Raised if the server is just not available, e.g. Twitter is down
+    class ServerUnavailableError < WaderError; end
     
-    attr_accessor :screen_name, :password, :stream, :connection
+    attr_accessor :screen_name, :password, :stream, :connection,
+      :server_unavailable_max_retries, 
+      :server_unavailable_wait, 
+      :server_unavailable_retries
 
     def initialize(screen_name,password,stream)
       self.screen_name = screen_name
       self.password = password
       self.stream = stream
+      self.server_unavailable_max_retries = 5
+      self.server_unavailable_wait = 60
     end
 
     #
@@ -38,27 +46,22 @@ module Flamingo
     #   dispatch each for later handling
     #
     def run
-      EventMachine::run do
-        self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
-        Flamingo.logger.info("Listening on stream: #{stream.path}")
-
-        connection.each_item do |event_json|
-          dispatch_event(event_json)
-        end
-
-        connection.on_error do |message|
-          handle_connection_error(message)
-        end
-
-        connection.on_reconnect do |timeout, retries|
-          Flamingo.logger.warn "Failed to connect. Will reconnect after "+
-            "#{timeout}. Retry \##{retries}"
-        end
-
-        connection.on_max_reconnects do |timeout, retries|
-          stop_and_raise!(MaxReconnectsExceededError.new(
-            "Failed to reconnect after #{retries-1} retries"
-          ))
+      self.server_unavailable_retries = 0
+      begin
+        connect_and_run
+      rescue => e
+        # This is largely to get around a bug in Twitter-Stream that should 
+        # be fixed in the next release. If the server is just not there on 
+        # the first try, it blows up. Hopefully this code can be removed after 
+        # that release.
+        Flamingo.logger.warn "Failure initiating connection. Most likely "+
+          "because server is unavailable.\n#{e}\n#{e.backtrace.join("\n\t")}"
+        if server_unavailable_retries < server_unavailable_max_retries
+          sleep(server_unavailable_wait)
+          self.server_unavailable_retries += 1
+          retry
+        else
+          raise ServerUnavailableError.new
         end
       end
       raise @error if @error
@@ -83,8 +86,34 @@ module Flamingo
       end
       EM.stop
     end
-
+    
     private
+      def connect_and_run
+        EventMachine::run do
+          self.connection = stream.connect(:auth=>"#{screen_name}:#{password}",:host=>'0.0.0.0',:port=>'8080')
+          Flamingo.logger.info("Listening on stream: #{stream.path}")
+  
+          connection.each_item do |event_json|
+            dispatch_event(event_json)
+          end
+  
+          connection.on_error do |message|
+            handle_connection_error(message)
+          end
+  
+          connection.on_reconnect do |timeout, retries|
+            Flamingo.logger.warn "Failed to connect. Will reconnect after "+
+              "#{timeout}. Retry \##{retries}"
+          end
+  
+          connection.on_max_reconnects do |timeout, retries|
+            stop_and_raise!(MaxReconnectsExceededError.new(
+              "Failed to reconnect after #{retries-1} retries"
+            ))
+          end
+        end
+      end
+      
       # Decides what to do with specific connection errors. For explanations 
       # of various HTTP status codes from the Streaming API, see:
       # http://dev.twitter.com/pages/streaming_api_response_codes

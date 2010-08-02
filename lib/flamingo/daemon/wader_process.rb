@@ -6,8 +6,10 @@ module Flamingo
       EXIT_CLEAN = 0
 
       # Non-fatal exit code - For transient network errors where a retry is 
-      # likely to resolve the probelm
-      EXIT_MAX_RECONNECTS = 001
+      # likely to resolve the problem
+      EXIT_UNKNOWN_ERROR      = 001
+      EXIT_MAX_RECONNECTS     = 002
+      EXIT_SERVER_UNAVAILABLE = 003
 
       # 1XX is a fatal exit code - Human intervention or a configuration change 
       # is necessary to get the wader started
@@ -41,15 +43,10 @@ module Flamingo
         exit_code = EXIT_CLEAN
         begin
           @wader.run
-        rescue Flamingo::Wader::AuthenticationError 
-          exit_code = EXIT_AUTHENTICATION
-        rescue Flamingo::Wader::UnknownStreamError
-          exit_code = EXIT_UNKNOWN_STREAM
-        rescue Flamingo::Wader::InvalidParametersError
-          exit_code = EXIT_INVALID_PARAMS
-        rescue Flamingo::Wader::MaxReconnectsExceededError
-          exit_code = EXIT_MAX_RECONNECTS
+        rescue => e
+          exit_code = error_exit_code(e)
         end
+        
         Flamingo.logger.info "Wader pid=#{Process.pid} exited with code #{exit_code}"
         exit(exit_code)
       end
@@ -57,6 +54,24 @@ module Flamingo
       def stop
         @wader.stop
       end
+
+      private
+        def error_exit_code(ex)
+          case ex
+            when Flamingo::Wader::AuthenticationError 
+              then EXIT_AUTHENTICATION
+            when Flamingo::Wader::UnknownStreamError
+              then EXIT_UNKNOWN_STREAM
+            when Flamingo::Wader::InvalidParametersError
+              then EXIT_INVALID_PARAMS
+            when Flamingo::Wader::MaxReconnectsExceededError
+              then EXIT_MAX_RECONNECTS
+            when Flamingo::Wader::ServerUnavailableError
+              then EXIT_SERVER_UNAVAILABLE
+            else
+              EXIT_UNKNOWN_ERROR
+          end
+        end
     end
   end
 end
