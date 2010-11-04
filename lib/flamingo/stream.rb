@@ -25,7 +25,7 @@ module Flamingo
     end
     
     def connect(options)
-      conn_opts = {:ssl => true, :user_agent => "Flamingo/0.1" }.
+      conn_opts = {:ssl => false, :user_agent => "Flamingo/0.1" }.
         merge(options).merge(:path=>path)
       Twitter::JSONStream.connect(conn_opts)
     end

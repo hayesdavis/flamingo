@@ -38,6 +38,10 @@ module Flamingo
       logger.info "Loaded config file from #{config_file}"
     end
     
+    def config=(config)
+      @config = config 
+    end
+    
     def config
       @config
     end
@@ -97,6 +101,10 @@ module Flamingo
 
     def logger
       @logger ||= new_logger
+    end
+    
+    def logger=(logger)
+      @logger = logger
     end
     
     private

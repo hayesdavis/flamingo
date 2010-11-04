@@ -33,3 +33,52 @@ Event Dispatch
 --------------
 * How can it generically handle dispatching events? 
 ** Could route event/tweet to particular queue using resque given configurable queue and class name
+
+Streaming API Scenarios
+-----------------------
+* No connection at all - nobody is home
+  * Retry maximum number of times, then give up
+* Various disconnections (clean or otherwise)
+  * Retry up to max times, then give up
+* Error codes: See http://dev.twitter.com/pages/streaming_api_response_codes
+  * 401 and 403 - Auth issues
+    * Likely to happen at startup
+    * Should probably stop the entire flamingod with a message
+  * 404 - Not found
+    * Likely an invalid path
+    * Should probably stop the entire flamingod
+  * 406 - Not acceptable
+    * Could happen due to lack of params. If there are no params, we should 
+      go into a waiting state to wait for more params.
+    * If we get this and we do have params, it's a big deal because it impacts 
+      our connectivity to twitter. Need to do something to alert the user.
+  * 413 - Parameters too long, outside of counts for role
+    * A big deal, it means we can't connect to Twitter. Needs immediate fixing.
+    * User should be alerted in some way
+  * 416 - Unacceptable range, outside of values for role
+    *  Same as 406, 413
+  * 500 - Server error
+    * Probably should wait and retry after some period
+  * 503 - Overloaded
+    * Probably should wait and retry after some (longish) period
+    
+Fatal Error Classes:
+* Authentication: 401, 403
+* Invalid Stream: 404
+* Invalid Parameters: 406, 413, 416
+
+Retry-able Transient Error Classes:
+* Server unavailable
+* Connection closed
+* Server HTTP Errors: 5XX
+    
+Should Introduce a Connectivity Status
+--------------------------------------
+Flamingo:Stream:Status
+  * Connecting - The wader is in the process of connecting to the server
+  * Connected - The wader is connected and receiving tweets
+  * Disconnected-Retry - The wader is not connected but is trying
+  * Disconnected-Fatal - The wader is disconnected and can't get reconnected 
+
+Flamingo:Stream:Status:Message
+  * String describing what happened
