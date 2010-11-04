@@ -13,8 +13,11 @@ logging:
   level:        DEBUG
 
 # Where is the redis server the flamingod processes should connect to?
+# By default, all keys are namespaced wih "flamingo". May be changed 
+# to run multiple flamingods in the same redis DB.
 redis:
   host:         0.0.0.0:6379
+  namespace:    flamingo
 
 # What port and interface should the flamingod web_server listen on?
 # use 0.0.0.0 for all interfaces, 127.0.0.1 to listen on only localhost

@@ -27,13 +27,14 @@ require 'flamingo/daemon/flamingod'
 require 'flamingo/logging/formatter'
 require 'flamingo/web/server'
 
+
 module Flamingo
   
   class << self
     
     def configure!(config_file=nil)
       config_file = find_config_file(config_file)
-      @config = Flamingo::Config.load(config_file)
+      self.config = Flamingo::Config.load(config_file)
       validate_config!
       logger.info "Loaded config file from #{config_file}"
     end
@@ -54,18 +55,19 @@ module Flamingo
     #   3. An instance of `Redis`, `Redis::Client`, `Redis::DistRedis`,
     #      or `Redis::Namespace`.
     def redis=(server)
+      namespace = config.redis.namespace(:flamingo)
       case server
-      when String
-        host, port, db = server.split(':')
-        redis = Redis.new(:host => host, :port => port,
-          :thread_safe => true, :db => db)
-        @redis = Redis::Namespace.new(:flamingo, :redis => redis)
-      when Redis, Redis::Client, Redis::DistRedis
-        @redis = Redis::Namespace.new(:flamingo, :redis => server)
-      when Redis::Namespace
-        @redis = server
-      else
-        raise "Invalid redis configuration: #{server.inspect}"
+        when String
+          host, port, db = server.split(':')
+          redis = Redis.new(:host => host, :port => port,
+            :thread_safe => true, :db => db)
+          @redis = Redis::Namespace.new(namespace, :redis => redis)
+        when Redis, Redis::Client, Redis::DistRedis
+          @redis = Redis::Namespace.new(namespace, :redis => server)
+        when Redis::Namespace
+          @redis = server
+        else
+          raise "Invalid redis configuration: #{server.inspect}"
       end
     end
   
@@ -75,28 +77,6 @@ module Flamingo
       return @redis if @redis
       self.redis = config.redis.host('localhost:6379')
       self.redis
-    end
-
-    def new_logger
-      # determine log file location (default is root_dir/log/flamingo.log)
-      if valid_logging_dest?(config.logging.dest(nil))
-        log_dest = config.logging.dest
-      else
-        log_dest = File.join(root_dir,'log','flamingo.log')
-      end
-
-      # determine logging level (default is Logger::INFO)
-      begin
-        log_level = Logger.const_get(config.logging.level.upcase)
-      rescue
-        log_level = Logger::INFO
-      end
-
-      # create logger facility
-      logger = Logger.new(log_dest)
-      logger.level = log_level
-      logger.formatter = Flamingo::Logging::Formatter.new
-      logger
     end
 
     def logger
