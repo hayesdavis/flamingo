@@ -10,6 +10,12 @@ module Flamingo
       :retweet  => "statuses/retweet",
       :sample   => "statuses/sample"
     )
+    
+    DEFAULT_CONNECTION_OPTIONS = {
+      :method     =>"POST", 
+      :ssl        => false, 
+      :user_agent => "Flamingo/#{Flamingo::VERSION}"
+    }
 
     class << self
       def get(name)
@@ -25,13 +31,17 @@ module Flamingo
     end
     
     def connect(options)
-      conn_opts = {:ssl => false, :user_agent => "Flamingo/0.1" }.
-        merge(options).merge(:path=>path)
-      Twitter::JSONStream.connect(conn_opts)
+      Twitter::JSONStream.connect(connection_options(options))
+    end
+    
+    def connection_options(overrides={})
+      DEFAULT_CONNECTION_OPTIONS.
+        merge(overrides).
+        merge(:path=>path,:content=>query)      
     end
     
     def path
-      "/#{VERSION}/#{resource}.json?#{query}"
+      "/#{VERSION}/#{resource}.json"
     end
     
     def resource
