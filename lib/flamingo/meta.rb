@@ -37,6 +37,13 @@ module Flamingo
         delete(key)
       end
     end
+    
+    def to_h
+      all.inject({}) do |hash, (key,value)|
+        hash[key] = value
+        hash
+      end
+    end
   
     private
       def norm_value(value)

@@ -67,10 +67,16 @@ class MetaTest < Test::Unit::TestCase
     assert_equal(0,meta.all.size)
   end
   
-  
-#  def teardown
-#    Flamingo.meta.clear
-#    Flamingo.teardown
-#  end
+  def test_to_h_creates_hash_of_keys
+    meta = Flamingo.meta
+    meta["foo"] = 1
+    meta["bar"] = "rab"
+    meta["baz"] = "zab"
+    
+    hash = meta.to_h
+    assert_equal(1,hash["foo"])
+    assert_equal("rab",hash["bar"])
+    assert_equal("zab",hash["baz"])
+  end
   
 end
