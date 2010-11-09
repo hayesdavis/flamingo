@@ -143,17 +143,36 @@ module Flamingo
             io.reopen '/dev/null' rescue nil
           end
           run
+          clear_process_meta_data
           pid_file.delete
         end
         Process.detach(pid)
         pid
       end
+      
+      def set_process_meta_data
+        meta = Flamingo.meta
+        meta[:start_time] = Time.now.utc.to_i
+        meta[:host] = `hostname`.chomp rescue nil
+        meta[:pid] = Process.pid
+        meta[:running] = true
+      end
+      
+      def clear_process_meta_data
+        meta = Flamingo.meta
+        meta.delete(:start_time)
+        meta.delete(:host)
+        meta.delete(:pid)
+        meta[:running] = false
+      end
 
       def run
         $0 = 'flamingod'
+        set_process_meta_data
         trap_signals
         start_children
         wait_on_children
+        clear_process_meta_data
       end
     end
   end

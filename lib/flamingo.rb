@@ -11,8 +11,8 @@ require 'sinatra/base'
 
 require 'flamingo/version'
 require 'flamingo/config'
+require 'flamingo/meta'
 require 'flamingo/dispatch_event'
-require 'flamingo/dispatch_error'
 require 'flamingo/stream_params'
 require 'flamingo/stream'
 require 'flamingo/subscription'
@@ -92,6 +92,10 @@ module Flamingo
     
     def dispatch_queue
       @dispatch_queue ||= "#{namespace}:dispatch"
+    end
+    
+    def meta
+      @meta ||= Flamingo::Meta.new(redis)
     end
     
     private

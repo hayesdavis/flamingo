@@ -13,6 +13,23 @@ module Flamingo
       @logger = nil
       @redis = nil
       @dispatch_queue = nil
+      @meta = nil
     end
   end
+end
+
+module FlamingoTestCase
+  
+  def setup_flamingo
+    Flamingo.config = Flamingo::Config.load(
+      File.join(File.dirname(__FILE__),"test_config.yml"))
+  end
+  
+  def teardown_flamingo
+    Flamingo.redis.keys("*").each do |key|
+      Flamingo.redis.del(key)
+    end
+    Flamingo.teardown
+  end
+  
 end

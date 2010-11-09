@@ -14,6 +14,10 @@ module Flamingo
         api.sort.join("\n")
       end
       
+      get '/meta.json' do
+        to_json(Flamingo.meta.to_h)
+      end
+      
       get '/streams/:name.json' do
         stream = Stream.get(params[:name])
         to_json(
