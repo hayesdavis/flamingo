@@ -1,3 +1,3 @@
-Dir.glob("#{File.dirname(__FILE__)}/wader/**/test_*.rb") do |file|
+Dir.glob("#{File.dirname(__FILE__)}/wader/**/*_test.rb") do |file|
   require file
 end
