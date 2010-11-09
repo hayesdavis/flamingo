@@ -36,12 +36,19 @@ module WaderTest
   end  
 end
 
-# Make reconnects move faster
+# Speed up tests by changing some constants so that reconnects move faster
 class Twitter::JSONStream
-  NF_RECONNECT_START  = 0
-  NF_RECONNECT_ADD    = 0
-  RETRIES_MAX         = 1
   
-  AF_RECONNECT_START  = 0
-  AF_RECONNECT_MUL    = 1
+  # Silently redefine a constant without warnings
+  def self.redefine_const(name,value)
+    remove_const(name)
+    const_set(name,value)
+  end
+
+  redefine_const(:NF_RECONNECT_START, 0)
+  redefine_const(:NF_RECONNECT_ADD,   0)
+  redefine_const(:RETRIES_MAX,        1)
+  
+  redefine_const(:AF_RECONNECT_START, 0)
+  redefine_const(:AF_RECONNECT_MUL,   1)
 end
