@@ -31,8 +31,10 @@ end
 
 module WaderTest
   def setup
-    Flamingo.config = Flamingo::Config.new
-    Flamingo.logger = Logger.new("/dev/null")
+    cfg = Flamingo::Config.new
+    logger = Logger.new("/dev/null")
+    Flamingo.stubs(:config).returns(cfg)
+    Flamingo.stubs(:logger).returns(logger)
   end  
 end
 

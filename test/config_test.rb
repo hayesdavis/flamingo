@@ -18,46 +18,109 @@ class ConfigTest < Test::Unit::TestCase
     File.delete(filename)
   end
   
+  def test_configure_accepts_filename
+    filename = "./test_config_#{Time.now.to_i}.yml"
+    File.open(filename,'w') do |cfg|
+      cfg.puts "username: example"
+      cfg.puts "password: secret"
+      cfg.puts "redis:"
+      cfg.puts "  host: 0.0.0.0:6379"
+      cfg.puts "  namespace: test"
+    end
+    Flamingo.configure!(filename)
+    assert_equal("example",Flamingo.config.username)
+    assert_equal("secret",Flamingo.config.password)
+    assert_equal("0.0.0.0:6379",Flamingo.config.redis.host)
+    assert_equal("test",Flamingo.config.redis.namespace)
+  ensure
+    File.delete(filename)
+  end
+  
+  def test_configure_accepts_flamingo_config
+    Flamingo.configure!(Flamingo::Config.new(
+      "username"=>"example","password"=>"secret",
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test" }))
+    assert_equal("example",Flamingo.config.username)
+    assert_equal("secret",Flamingo.config.password)
+    assert_equal("0.0.0.0:6379",Flamingo.config.redis.host)
+    assert_equal("test",Flamingo.config.redis.namespace)    
+  end
+  
+  def test_configure_accepts_hash
+    Flamingo.configure!(
+      "username"=>"example","password"=>"secret",
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test" })
+    assert_equal("example",Flamingo.config.username)
+    assert_equal("secret",Flamingo.config.password)
+    assert_equal("0.0.0.0:6379",Flamingo.config.redis.host)
+    assert_equal("test",Flamingo.config.redis.namespace)    
+  end  
+  
   def test_default_redis_namespace_set_if_not_explicitly_configured
-    Flamingo.config = Flamingo::Config.new(
-      "redis"=>{"host"=>"0.0.0.0:6379"}
-    )
+    Flamingo.configure!(new_config("redis"=>{"host"=>"0.0.0.0:6379"}))
     assert_equal(Redis::Namespace,Flamingo.redis.class,
       "Redis instance should actually be Redis::Namespace")
     assert_equal("flamingo",Flamingo.redis.namespace.to_s)
   end
   
   def test_configured_redis_namespace_used
-    Flamingo.config = Flamingo::Config.new(
+    Flamingo.configure!(new_config(
       "redis"=>{
         "host"=>"0.0.0.0:6379",
         "namespace"=>"test"
       }
-    )
+    ))
     assert_equal(Redis::Namespace,Flamingo.redis.class,
       "Redis instance should actually be Redis::Namespace")
     assert_equal("test",Flamingo.redis.namespace)
   end
   
   def test_default_namespace_used_for_dispatch_queue
-    Flamingo.config = Flamingo::Config.new(
+    Flamingo.configure!(new_config(
       "redis"=>{"host"=>"0.0.0.0:6379" }
-    )
+    ))
     assert_equal("flamingo:dispatch",Flamingo.dispatch_queue)
   end
   
   def test_configured_namespace_used_for_dispatch_queue
-    Flamingo.config = Flamingo::Config.new(
+    Flamingo.configure!(new_config(
       "redis"=>{
         "host"=>"0.0.0.0:6379",
         "namespace"=>"test"
       }
-    )
+    ))
     assert_equal("test:dispatch",Flamingo.dispatch_queue)
-  end  
+  end 
+  
+  def test_resque_redis_configured_with_flamingo_redis_host
+    Resque.expects(:redis=).with("0.0.0.0:6379").once
+    Flamingo.configure!(new_config(
+      "redis"=>{
+        "host"=>"0.0.0.0:6379",
+        "namespace"=>"test"
+      }
+    ))
+  end
+  
+  def test_resque_redis_retains_resque_namespace
+    Flamingo.configure!(new_config(
+      "redis"=>{
+        "host"=>"0.0.0.0:6379",
+        "namespace"=>"test"
+      }
+    ))
+    assert_equal(:resque,Resque.redis.namespace)
+  end
   
   def teardown
     Flamingo.teardown
   end
+  
+  private
+    def new_config(overrides={})
+      Flamingo::Config.new({
+        "username"=>"x","password"=>"y"
+      }.merge(overrides))
+    end
   
 end

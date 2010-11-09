@@ -27,47 +27,48 @@ require 'flamingo/daemon/flamingod'
 require 'flamingo/logging/formatter'
 require 'flamingo/web/server'
 
-
 module Flamingo
   
   class << self
     
-    def configure!(config_file=nil)
-      config_file = find_config_file(config_file)
-      self.config = Flamingo::Config.load(config_file)
+    # Configures flamingo. This must be called prior to using any flamingo 
+    # classes. 
+    # 
+    # The config argument may be one of:
+    # 1) nil: Try to locate a config file in ./flamingo.yml, ~/flamingo.yml
+    # 2) String: A config file name (preferred)
+    # 3) Flamingo::Config: Used as the configuration directly
+    # 4) Hash: Converted to a Flamingo::Config and used as the configuration
+    def configure!(cfg_info=nil,validate=true)
+      if cfg_info.nil? || cfg_info.kind_of?(String)
+        config_file = find_config_file(cfg_info)
+        @config = Flamingo::Config.load(config_file)
+        logger.info "Loaded config file from #{config_file}"
+      elsif cfg_info.kind_of?(Flamingo::Config)
+        @config = cfg_info
+      elsif cfg_info.kind_of?(Hash)
+        @config = Flamingo::Config.new(cfg_info)
+      end
       validate_config!
-      logger.info "Loaded config file from #{config_file}"
-    end
-    
-    def config=(config)
-      @config = config 
+      # Ensure redis gets loaded
+      redis
     end
     
     def config
       @config
     end
     
-    # PHD: Lovingly borrowed from Resque
+    # PHD: Partially borrowed from resque
 
-    # Accepts:
-    #   1. A 'hostname:port' string
-    #   2. A 'hostname:port:db' string (to select the Redis db)
-    #   3. An instance of `Redis`, `Redis::Client`, `Redis::DistRedis`,
-    #      or `Redis::Namespace`.
+    # server must be a "hostname:port[:db]" string
     def redis=(server)
-      case server
-        when String
-          host, port, db = server.split(':')
-          redis = Redis.new(:host => host, :port => port,
-            :thread_safe => true, :db => db)
-          @redis = Redis::Namespace.new(namespace, :redis => redis)
-        when Redis, Redis::Client, Redis::DistRedis
-          @redis = Redis::Namespace.new(namespace, :redis => server)
-        when Redis::Namespace
-          @redis = server
-        else
-          raise "Invalid redis configuration: #{server.inspect}"
-      end
+      host, port, db = server.split(':')
+      redis = Redis.new(:host => host, :port => port,
+        :thread_safe => true, :db => db)
+      @redis = Redis::Namespace.new(namespace, :redis => redis)
+      
+      # Ensure resque is configured to use this redis as well
+      Resque.redis = server
     end
   
     # Returns the current Redis connection. If none has been created, will

@@ -1,3 +1,5 @@
+username: example
+password: secret
 redis:
   host: 0.0.0.0:6379
   namespace: test

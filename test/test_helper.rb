@@ -21,7 +21,7 @@ end
 module FlamingoTestCase
   
   def setup_flamingo
-    Flamingo.config = Flamingo::Config.load(
+    Flamingo.configure!(
       File.join(File.dirname(__FILE__),"test_config.yml"))
   end
   
