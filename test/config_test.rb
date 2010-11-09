@@ -39,6 +39,23 @@ class ConfigTest < Test::Unit::TestCase
     assert_equal("test",Flamingo.redis.namespace)
   end
   
+  def test_default_namespace_used_for_dispatch_queue
+    Flamingo.config = Flamingo::Config.new(
+      "redis"=>{"host"=>"0.0.0.0:6379" }
+    )
+    assert_equal("flamingo:dispatch",Flamingo.dispatch_queue)
+  end
+  
+  def test_configured_namespace_used_for_dispatch_queue
+    Flamingo.config = Flamingo::Config.new(
+      "redis"=>{
+        "host"=>"0.0.0.0:6379",
+        "namespace"=>"test"
+      }
+    )
+    assert_equal("test:dispatch",Flamingo.dispatch_queue)
+  end  
+  
   def teardown
     Flamingo.teardown
   end

@@ -1,10 +1,13 @@
 module Flamingo
   class DispatchEvent
 
-    @queue = :flamingo
     @parser = Yajl::Parser.new(:symbolize_keys => true)
 
     class << self
+      
+      def queue
+        Flamingo.dispatch_queue
+      end
 
       #
       # TODO Track stats including: tweets per second and last tweet time

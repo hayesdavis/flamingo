@@ -55,7 +55,6 @@ module Flamingo
     #   3. An instance of `Redis`, `Redis::Client`, `Redis::DistRedis`,
     #      or `Redis::Namespace`.
     def redis=(server)
-      namespace = config.redis.namespace(:flamingo)
       case server
         when String
           host, port, db = server.split(':')
@@ -85,6 +84,14 @@ module Flamingo
     
     def logger=(logger)
       @logger = logger
+    end
+    
+    def namespace
+      config.redis.namespace(:flamingo)
+    end
+    
+    def dispatch_queue
+      @dispatch_queue ||= "#{namespace}:dispatch"
     end
     
     private

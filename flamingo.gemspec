@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency "yajl-ruby",       ">= 0.6.7"
   s.add_dependency "activesupport",   ">= 2.1.0"
   
+  s.add_development_dependency "mocha", ">= 0.9.8"
   s.add_development_dependency "mockingbird", ">= 0.1.0"
 
   s.description = <<-description
@@ -38,6 +39,8 @@ Gem::Specification.new do |s|
     a REST interface to change the parameters sent to the Twitter Streaming 
     resource. All events from the streaming API are placed on a resque job 
     queue where your application can process them.
+    
+    CAVEAT EMPTOR: This gem is alpha code so act accordingly.
 
   description
 end
