@@ -1,10 +1,14 @@
 module Flamingo
   class DispatchError
     
-    @queue = :flamingo
-    
-    def self.perform(type,message,data)
-      Flamingo.logger.info("#{type}, #{message}, #{data.inspect}\n")
+    class << self
+      def queue
+        Flamingo.dispatch_queue
+      end
+      
+      def self.perform(type,message,data)
+        Flamingo.logger.info("#{type}, #{message}, #{data.inspect}\n")
+      end
     end
     
   end
