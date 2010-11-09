@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helper"
 
-class TestNonFatalHttpResponses < Test::Unit::TestCase
+class NonFatalHttpResponsesTest < Test::Unit::TestCase
   
   include WaderTest
   
@@ -10,7 +10,7 @@ class TestNonFatalHttpResponses < Test::Unit::TestCase
     def setup_mockingbird
       unless @started
         conn_codes = self.codes
-        puts "WARNING: #{self.name} will take a long time to complete."
+        puts "WARNING: #{self.name} will take some time to complete."
         puts "Testing #{conn_codes.length} HTTP status codes"
         Mockingbird.setup(:port=>8080) do
           conn_codes.each_with_index do |code, num|
@@ -31,9 +31,9 @@ class TestNonFatalHttpResponses < Test::Unit::TestCase
     def codes
       @codes ||= begin
         fatal_codes = [401,403,404,406,413,416]
-        (300..399).map +
-        ((400..499).map - fatal_codes) +
-        (500..599).map
+        (300..307).map +
+        ((400..417).map - fatal_codes) +
+        (500..505).map
       end
     end
     
