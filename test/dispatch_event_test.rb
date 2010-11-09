@@ -2,13 +2,10 @@ require File.join(File.dirname(__FILE__),"test_helper")
 
 class DispatchEventTest < Test::Unit::TestCase
   
+  include FlamingoTestCase
+  
   def setup
-    Flamingo.config = Flamingo::Config.new(
-      "redis"=>{
-        "host"=>"0.0.0.0:6379",
-        "namespace"=>"test"
-      }
-    )    
+    setup_flamingo
   end
   
   def test_uses_flamingo_dispatch_queue
@@ -16,7 +13,7 @@ class DispatchEventTest < Test::Unit::TestCase
   end
   
   def teardown
-    Flamingo.teardown
+    teardown_flamingo
   end
   
 end
