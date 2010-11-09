@@ -141,7 +141,6 @@ module Flamingo
       end
       
       def dispatch_event(event_json)
-        Flamingo.logger.debug "Wader dispatched event"
         Resque.enqueue(Flamingo::DispatchEvent, event_json)
       end
 

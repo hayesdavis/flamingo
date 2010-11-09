@@ -21,7 +21,7 @@ module Flamingo
         type, event = typed_event(parse(event_json))
         Subscription.all.each do |sub|
           Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
-          Flamingo.logger.debug "Put job on subscription queue #{sub.name} for #{event_json}"
+          Flamingo.logger.debug "Put job on subscription queue #{sub.name}\n#{event_json}"
         end
       end
 
