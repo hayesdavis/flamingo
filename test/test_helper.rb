@@ -26,8 +26,10 @@ module FlamingoTestCase
   end
   
   def teardown_flamingo
-    Flamingo.redis.keys("*").each do |key|
-      Flamingo.redis.del(key)
+    if Flamingo.namespace.to_s == "test"
+      Flamingo.redis.keys("*").each do |key|
+        Flamingo.redis.del(key)
+      end
     end
     Flamingo.teardown
   end
