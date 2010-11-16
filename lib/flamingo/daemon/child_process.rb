@@ -24,8 +24,16 @@ module Flamingo
       end
       
       def start
-        self.pid = fork { run }
-      end      
+        self.pid = fork do
+          post_fork
+          run
+        end
+      end
+      
+      private
+        def post_fork
+          Flamingo.reconnect!
+        end
     end
   end
 end
