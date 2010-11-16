@@ -99,7 +99,26 @@ module Flamingo
       @meta ||= Flamingo::Meta.new(redis)
     end
     
+    # Intended to be called after a fork so that we don't have 
+    # issues with shared file descriptors, sockets, etc
+    def reconnect!
+      reconnect_redis_client(@redis)      
+      reconnect_redis_client(Resque.redis)
+      # Reload logger
+      logger.close
+      self.logger = new_logger
+    end
+    
     private
+      def reconnect_redis_client(client)
+        # Unfortunately older versions of the Redis client don't make these 
+        # methods public so we have to use send. Later versions have made 
+        # these public.
+        if client && (client.send(:connected?) rescue true)
+          client.send(:reconnect)
+        end
+      end
+      
       def root_dir
         File.expand_path(File.dirname(__FILE__)+'/..')
       end
