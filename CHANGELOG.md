@@ -1,5 +1,9 @@
-0.3.0
-=====
+0.3.1.RC1
+=========
+* Fixed issues with shared redis socket connections on forking child processes
+
+0.3.0 (non-public)
+==================
 * All Streaming API connections are now made with POST instead of GET
 * Added namespacing within Redis (and Resque) via the redis.namespace config 
   option which makes it possible to run multiple flamingos on the same Redis DB 
