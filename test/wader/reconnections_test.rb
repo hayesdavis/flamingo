@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helper"
 
-class TestReconnections < Test::Unit::TestCase
+class ReconnectionsTest < Test::Unit::TestCase
   
   include WaderTest
   

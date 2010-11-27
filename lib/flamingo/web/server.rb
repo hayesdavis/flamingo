@@ -9,9 +9,13 @@ module Flamingo
       get '/' do
         content_type 'text/plain'
         api = self.methods.select do |method|
-          (method =~ /^(GET|POST) /) && !(method =~ /png$/)
+          (method =~ /^(GET|POST|PUT|DELETE) /) && !(method =~ /png$/)
         end
         api.sort.join("\n")
+      end
+      
+      get '/meta.json' do
+        to_json(Flamingo.meta.to_h)
       end
       
       get '/streams/:name.json' do

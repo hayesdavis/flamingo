@@ -18,14 +18,18 @@ Gem::Specification.new do |s|
 
   s.extra_rdoc_files  = [ "LICENSE", "README.md" ]
 
-  s.add_dependency "redis",           ">= 1.0.7"
-  s.add_dependency "redis-namespace", ">= 0.7.0"
-  s.add_dependency "resque",          ">= 1.9.7"
-  s.add_dependency "sinatra",         ">= 0.9.2"
-  s.add_dependency "twitter-stream",  ">= 0.1.4"
-  s.add_dependency "yajl-ruby",       ">= 0.6.7"
-  s.add_dependency "activesupport",   ">= 2.1.0"
+  s.add_dependency "activesupport",   ">= 2.1.0", "<= 2.3.5"
+  s.add_dependency "eventmachine",    "= 0.12.10"
+  s.add_dependency "rack",            "= 1.1.0"
+  s.add_dependency "sinatra",         ">= 0.9.2", "<= 1.0"
+  s.add_dependency "redis",           ">= 1.0.7", "< 2.0.0"
+  s.add_dependency "redis-namespace", "= 0.7.0"
+  s.add_dependency "resque",          "= 1.9.7"
+  s.add_dependency "twitter-stream",  ">= 0.1.4", "<= 0.1.6"
+  s.add_dependency "yajl-ruby",       "= 0.7.6"
+  s.add_dependency "SystemTimer",     "~> 1.2"
   
+  s.add_development_dependency "mocha", ">= 0.9.8"
   s.add_development_dependency "mockingbird", ">= 0.1.0"
 
   s.description = <<-description
@@ -38,6 +42,8 @@ Gem::Specification.new do |s|
     a REST interface to change the parameters sent to the Twitter Streaming 
     resource. All events from the streaming API are placed on a resque job 
     queue where your application can process them.
+    
+    CAVEAT EMPTOR: This gem is alpha code so act accordingly.
 
   description
 end

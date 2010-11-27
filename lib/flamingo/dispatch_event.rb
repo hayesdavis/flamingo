@@ -1,10 +1,17 @@
 module Flamingo
   class DispatchEvent
 
-    @queue = :flamingo
     @parser = Yajl::Parser.new(:symbolize_keys => true)
 
     class << self
+      
+      def queue
+        Flamingo.dispatch_queue
+      end
+      
+      def meta
+        Flamingo.meta
+      end
 
       #
       # TODO Track stats including: tweets per second and last tweet time
@@ -15,10 +22,13 @@ module Flamingo
       #      dispatching to improve in-order delivery (helps with "k-sorted")
       #
       def perform(event_json)
+        meta.incr("events:all_count")
+        meta.set("events:last_time",Time.now.utc.to_i)
         type, event = typed_event(parse(event_json))
+        meta.incr("events:#{type}_count")
         Subscription.all.each do |sub|
           Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
-          Flamingo.logger.debug "Put job on subscription queue #{sub.name} for #{event_json}"
+          Flamingo.logger.debug "Put job on subscription queue #{sub.name}\n#{event_json}"
         end
       end
 

@@ -1,0 +1,10 @@
+username: example
+password: secret
+redis:
+  host: 0.0.0.0:6379
+  namespace: test
+web:
+  host: 0.0.0.0:4711
+logging:
+  dest: /dev/null
+  level: INFO

@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helper"
 
-class TestNormalOperation < Test::Unit::TestCase
+class NormalOperationTest < Test::Unit::TestCase
   
   include WaderTest 
   

@@ -1,3 +1,3 @@
 module Flamingo
-  Version = VERSION = '0.2.2'
+  Version = VERSION = '0.3.1.RC1'
 end
