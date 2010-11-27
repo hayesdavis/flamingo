@@ -1,6 +1,9 @@
-0.3.1.RC1
-=========
+0.3.1 (public)
+==============
 * Fixed issues with shared redis socket connections on forking child processes
+* Updated the gemspec to have very narrow requirements as these are the versions 
+  of gems that Flamingo has been tested with in production. The next version 
+  will have more liberal requirements.
 
 0.3.0 (non-public)
 ==================
@@ -18,4 +21,4 @@
 * Changed logging output from dispatching
 * Cleaned up test suite (though it's still not 100% complete).
 * Introduced Mocha as a development dependency for running tests.
-* BUGFIX: Fixed issue where Resque redis configuraiton wasn't being set
+* BUGFIX: Fixed issue where Resque redis configuration wasn't being set
