@@ -12,24 +12,10 @@ a try if you have the need.
 
 Dependencies
 ------------
-* redis
-* resque
-* sinatra
-* twitter-stream
-* yajl-ruby
-* active_support
-* redis-namespace
-
-By default, the `resque` gem installs the latest 2.x `redis` gem, so if
-you are using Redis 1.x, you may want to swap it out.
-
-    $ gem list | grep redis
-    redis (2.0.3)
-    $ gem remove redis --version=2.0.3 -V
-
-    $ gem install redis --version=1.0.7
-    $ gem list | grep redis
-    redis (1.0.7)
+Check flamingo.gemspec for all the requirements. Currently there are quite a 
+few dependencies and they are very specific. We plan to have fewer dependencies 
+and be more liberal with versions soon. Right now these gems and versions are 
+what is working well in production for us.
 
 Getting Started
 ---------------
@@ -118,8 +104,12 @@ commandline (see below)
    Two things should now happen:
    * The pent-up jobs from the EXAMPLE queue should spray across your console
    * The resque dashboard should show the queue being emptied as a result 
+   
+10. Interact with your running flamingod instance via the REST API (by default it is on port 4711)
 
-
+        $ curl http://0.0.0.0:4711/
+   
+   That will show you available resources. Also, take a look at `lib/web/server.rb` for more.
    
 Overview
 --------
@@ -157,8 +147,12 @@ code.
 
 TODO
 -----
-* OAuth instructions
-    
+* A proper REST API client
+* Remove resque dependency
+* More liberal gem dependencies
+ * Redis 2.x
+ * ActiveSupport 3.x
+* OAuth support
 
 Flamingo
 --------
