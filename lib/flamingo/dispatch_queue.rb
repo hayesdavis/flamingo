@@ -1,16 +1,11 @@
 module Flamingo
   class DispatchQueue
     
-    attr_accessor :redis, :name
+    attr_accessor :redis
     
-    def initialize(redis,name)
+    def initialize(redis)
       self.redis = redis
-      self.name = name
-    end
-    
-    def name=(new_name)
-      @name = new_name
-      @queue_name = "queue:#{@name}"
+      @queue_name = "queue:dispatch"
     end
     
     def enqueue(event)

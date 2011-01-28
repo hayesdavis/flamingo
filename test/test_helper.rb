@@ -35,19 +35,3 @@ module FlamingoTestCase
   end
   
 end
-
-module Flamingo
-  class DispatchQueue
-    
-    def after_enqueue(&block)
-      @callback = block
-    end
-    
-    def enqueue(json)
-      if @callback
-        @callback.call(json)
-      end
-    end
-    
-  end
-end

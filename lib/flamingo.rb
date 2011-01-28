@@ -94,8 +94,7 @@ module Flamingo
     end
     
     def dispatch_queue
-      @dispatch_queue ||= Flamingo::DispatchQueue.new(redis,
-        "#{namespace}:dispatch")
+      @dispatch_queue ||= Flamingo::DispatchQueue.new(redis)
     end
     
     def meta

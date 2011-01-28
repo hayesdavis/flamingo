@@ -4,6 +4,16 @@ class NormalOperationTest < Test::Unit::TestCase
   
   include WaderTest 
   
+  class MockQueue
+    def after_enqueue(&block)
+      @hook = block
+    end
+    
+    def enqueue(event)
+      @hook.call(event)
+    end
+  end
+  
   def test_receives_and_consumes_events
     expected_count = 100
     Mockingbird.setup(:port=>8080) do
@@ -15,6 +25,7 @@ class NormalOperationTest < Test::Unit::TestCase
     wader = Flamingo::Wader.new('user','pass',MockStream.new)
 
     event_count = 0
+    Flamingo.instance_variable_set('@dispatch_queue',MockQueue.new)
     Flamingo.dispatch_queue.after_enqueue do |json|
       begin
         event_count += 1
