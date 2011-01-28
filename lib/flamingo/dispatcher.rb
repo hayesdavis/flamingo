@@ -9,13 +9,17 @@ module Flamingo
       @shutdown = true  
     end
     
-    def run
+    def run(wait_time=0.5)
       init_stats
       while(!@shutdown) do
         if event = next_event
           dispatch(event)
         else
-          wait
+          if wait_time == 0
+            stop
+          else
+            wait(wait_time)
+          end
         end
       end     
     end
@@ -33,8 +37,8 @@ module Flamingo
         Flamingo.logger
       end
       
-      def wait
-        sleep(0.5) unless @shutdown
+      def wait(time=0.5)
+        sleep(time) unless @shutdown
       end
 
       def dispatch(event_json)
@@ -46,6 +50,8 @@ module Flamingo
         Subscription.all.each do |sub|
           Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
         end
+      rescue => e 
+        handle_error(event_json,e)
       end
       
       def init_stats
@@ -63,6 +69,11 @@ module Flamingo
         meta.incr("events:all_count")
         meta.set("events:last_time",Time.now.to_i)       
         meta.incr("events:#{type}_count")
+      end
+      
+      def handle_error(event_json,error)
+        Logging::Utils.log_error(logger,
+          "Failure dispatching event: #{event_json}",error)
       end
       
       def handle_limit(event)
