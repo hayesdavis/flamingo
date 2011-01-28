@@ -30,12 +30,15 @@ module Resque
 end
 
 module WaderTest
+  include FlamingoTestCase
+  
   def setup
-    cfg = Flamingo::Config.new
-    logger = Logger.new("/dev/null")
-    Flamingo.stubs(:config).returns(cfg)
-    Flamingo.stubs(:logger).returns(logger)
+    setup_flamingo
   end  
+  
+  def teardown
+    teardown_flamingo
+  end
 end
 
 # Speed up tests by changing some constants so that reconnects move faster

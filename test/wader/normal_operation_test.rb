@@ -7,24 +7,24 @@ class NormalOperationTest < Test::Unit::TestCase
   def test_receives_and_consumes_events
     expected_count = 100
     Mockingbird.setup(:port=>8080) do
-      expected_count.times do 
-        send '{"foo":"bar"}'
+      expected_count.times do |i| 
+        send %Q({"foo":"bar#{i}"})
       end
     end
 
     wader = Flamingo::Wader.new('user','pass',MockStream.new)
 
     event_count = 0
-    Resque.after_enqueue do |type,*args|
-      if type == Flamingo::DispatchEvent
+    Flamingo.dispatch_queue.after_enqueue do |json|
+      begin
         event_count += 1
         if event_count == expected_count
           # Wait a second before stopping in case we get more events from the 
           # server, which would be an error
-          EM.add_timer(1) { wader.stop }
+          EM.add_timer(0.5) { wader.stop }
         end
-      else
-        fail("Should only receive events, not errors")
+      rescue => e
+        puts e
       end
     end
 

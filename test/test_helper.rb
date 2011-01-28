@@ -21,8 +21,8 @@ end
 module FlamingoTestCase
   
   def setup_flamingo
-    Flamingo.configure!(
-      File.join(File.dirname(__FILE__),"test_config.yml"))
+    file = File.join(File.dirname(__FILE__),"test_config.yml")
+    Flamingo.configure!(file)
   end
   
   def teardown_flamingo
@@ -34,4 +34,20 @@ module FlamingoTestCase
     Flamingo.teardown
   end
   
+end
+
+module Flamingo
+  class DispatchQueue
+    
+    def after_enqueue(&block)
+      @callback = block
+    end
+    
+    def enqueue(json)
+      if @callback
+        @callback.call(json)
+      end
+    end
+    
+  end
 end

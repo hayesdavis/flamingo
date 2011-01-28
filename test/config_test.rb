@@ -79,7 +79,7 @@ class ConfigTest < Test::Unit::TestCase
     Flamingo.configure!(new_config(
       "redis"=>{"host"=>"0.0.0.0:6379" }
     ))
-    assert_equal("flamingo:dispatch",Flamingo.dispatch_queue)
+    assert_equal("flamingo:dispatch",Flamingo.dispatch_queue.name)
   end
   
   def test_configured_namespace_used_for_dispatch_queue
@@ -89,7 +89,7 @@ class ConfigTest < Test::Unit::TestCase
         "namespace"=>"test"
       }
     ))
-    assert_equal("test:dispatch",Flamingo.dispatch_queue)
+    assert_equal("test:dispatch",Flamingo.dispatch_queue.name)
   end 
   
   def test_resque_redis_configured_with_flamingo_redis_host

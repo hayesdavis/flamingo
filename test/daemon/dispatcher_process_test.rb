@@ -10,14 +10,12 @@ class DispatcherProcessTest < Test::Unit::TestCase
   
   def test_works_off_flamingo_dispatch_queue
     # Prepare a mock worker that doesn't actually run
-    mock_worker = Resque::Worker.new(Flamingo.dispatch_queue)
-    mock_worker.expects(:work).with(1)
+    mock_worker = Flamingo::Dispatcher.new
+    mock_worker.expects(:run)
     
     # Return the mock worker as a result of new assuming new is called with the 
     # dispatch queue as an argument
-    Resque::Worker.expects(:new).
-      with(Flamingo.dispatch_queue).
-      returns(mock_worker)
+    Flamingo::Dispatcher.expects(:new).returns(mock_worker)
 
     proc = Flamingo::Daemon::DispatcherProcess.new
     proc.run #run doesn't fork, which is what we want here
