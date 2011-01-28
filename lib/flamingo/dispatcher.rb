@@ -29,6 +29,10 @@ module Flamingo
         Flamingo.meta
       end
       
+      def logger
+        Flamingo.logger
+      end
+      
       def wait
         sleep(0.5) unless @shutdown
       end
@@ -49,7 +53,7 @@ module Flamingo
         @start_time = Time.now.utc.to_i
         @rate_counter = Flamingo::Stats::RateCounter.new(10) do |eps|
           meta.set("events:rate",eps)
-          Flamingo.logger.info "%.3f eps" % [eps]
+          logger.debug "%.3f eps" % [eps]
         end
       end
 
@@ -65,7 +69,7 @@ module Flamingo
         skipped = event.values.first
         meta.set("events:limit:last_count",skipped)
         meta.set("events:limit:last_time",Time.now.to_i)
-        Flamingo.logger.warn "Rate limited: #{skipped} skipped"
+        logger.warn "Rate limited: #{skipped} skipped"
       end
 
       def parse(json)
@@ -73,13 +77,15 @@ module Flamingo
       end
 
       def typed_event(event)
+        # Events with one {key: value} pair are used as control events from 
+        # Twitter. These include limit, delete, scrub_geo and others.
         if event.size == 1
           event.shift
         else
           [:tweet, event]
         end
       rescue
-        puts "Failed to handle: #{event.inspect}"
+        logger.warn "Failed to handle: #{event.inspect}"
       end    
     
   end
