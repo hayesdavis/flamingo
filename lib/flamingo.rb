@@ -11,8 +11,12 @@ require 'sinatra/base'
 
 require 'flamingo/version'
 require 'flamingo/config'
+require 'flamingo/logging/formatter'
+require 'flamingo/logging/utils'
 require 'flamingo/meta'
-require 'flamingo/dispatch_event'
+require 'flamingo/stats/rate_counter'
+require 'flamingo/dispatch_queue'
+require 'flamingo/dispatcher'
 require 'flamingo/stream_params'
 require 'flamingo/stream'
 require 'flamingo/subscription'
@@ -24,7 +28,6 @@ require 'flamingo/daemon/dispatcher_process'
 require 'flamingo/daemon/web_server_process'
 require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
-require 'flamingo/logging/formatter'
 require 'flamingo/web/server'
 
 module Flamingo
@@ -92,7 +95,7 @@ module Flamingo
     end
     
     def dispatch_queue
-      @dispatch_queue ||= "#{namespace}:dispatch"
+      @dispatch_queue ||= Flamingo::DispatchQueue.new(redis)
     end
     
     def meta

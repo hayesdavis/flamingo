@@ -1,15 +1,24 @@
 module Flamingo
   module Daemon
     class DispatcherProcess < ChildProcess
+      
       def run
-        worker = Resque::Worker.new(Flamingo.dispatch_queue)
-        def worker.procline(value)
-          # Hack to get around resque insisting on setting the proces name
-          $0 = "flamingod-dispatcher"
-        end
+        register_signal_handlers
+        $0 = "flamingod-dispatcher"
+        @dispatcher = Flamingo::Dispatcher.new
         Flamingo.logger.info "Starting dispatcher on pid=#{Process.pid} under pid=#{Process.ppid}"
-        worker.work(1) # Wait 1s between jobs
+        @dispatcher.run
       end
+      
+      def stop
+        @dispatcher.stop
+      end
+      
+      def register_signal_handlers
+        trap("INT")  { stop }
+        trap("TERM") { stop }
+      end    
+      
     end
   end
 end

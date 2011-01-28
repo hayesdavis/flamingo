@@ -141,7 +141,7 @@ module Flamingo
       end
       
       def dispatch_event(event_json)
-        Resque.enqueue(Flamingo::DispatchEvent, event_json)
+        Flamingo.dispatch_queue.enqueue(event_json)
       end
 
   end

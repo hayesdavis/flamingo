@@ -25,12 +25,7 @@ class ReconnectionsTest < Test::Unit::TestCase
     
     wader = Flamingo::Wader.new('user','pass',MockStream.new)
     
-    job_count = 0
-    Resque.after_enqueue do |type,*args|
-      if type == Flamingo::DispatchEvent
-        job_count += 1
-      end
-    end
+    Flamingo.dispatch_queue.expects(:enqueue).times(10)
     
     assert_raise(
       Flamingo::Wader::MaxReconnectsExceededError,
@@ -40,7 +35,6 @@ class ReconnectionsTest < Test::Unit::TestCase
     end
     
     assert_equal(Twitter::JSONStream::RETRIES_MAX,wader.retries)
-    assert_equal(10,job_count,"Should have dispatched 10 jobs")
     
   ensure
     Mockingbird.teardown
@@ -76,12 +70,7 @@ class ReconnectionsTest < Test::Unit::TestCase
     
     wader = Flamingo::Wader.new('user','pass',MockStream.new)
     
-    job_count = 0
-    Resque.after_enqueue do |type,*args|
-      if type == Flamingo::DispatchEvent
-        job_count += 1
-      end
-    end
+    Flamingo.dispatch_queue.expects(:enqueue).times(10)
     
     assert_raise(
       Flamingo::Wader::MaxReconnectsExceededError,
@@ -91,7 +80,6 @@ class ReconnectionsTest < Test::Unit::TestCase
     end
     
     assert_equal(Twitter::JSONStream::RETRIES_MAX,wader.retries)
-    assert_equal(10,job_count,"Should have dispatched 10 jobs")
   end  
   
 end
