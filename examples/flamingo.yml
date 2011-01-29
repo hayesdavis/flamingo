@@ -11,6 +11,17 @@ stream:         filter
 logging:
   dest:         /tmp/flamingo.log
   level:        DEBUG
+  
+# Event logging (optional) 
+# Allows you to log the raw JSON of stream events to a set of rotating files 
+# stored in the directory you specify. Size is the maximum number of events 
+# that will be written to a log file before it is rotated. If size is omitted 
+# no rotation will be done. If you expect a high volume stream, set this number 
+# to something relatively large or you will end up with lots of small log files.
+# 10000-100000 is probably a good place to start.
+  event:
+    dir:        /tmp/flamingo_events
+    size:       100000
 
 # Where is the redis server the flamingod processes should connect to?
 # By default, all keys are namespaced wih "flamingo". May be changed 

@@ -10,7 +10,7 @@ module Flamingo
     end
     
     def run(wait_time=0.5)
-      init_stats
+      init_for_run
       while(!@shutdown) do
         if event = next_event
           dispatch(event)
@@ -25,6 +25,11 @@ module Flamingo
     end
     
     private
+      def init_for_run
+        init_stats
+        init_event_log
+      end
+        
       def next_event
         Flamingo.dispatch_queue.dequeue
       end
@@ -37,6 +42,14 @@ module Flamingo
         Flamingo.logger
       end
       
+      def init_event_log
+        @event_log = Flamingo.new_event_log
+      end
+      
+      def event_log
+        @event_log
+      end
+      
       def wait(time=0.5)
         sleep(time) unless @shutdown
       end
@@ -44,6 +57,9 @@ module Flamingo
       def dispatch(event_json)
         type, event = typed_event(parse(event_json))
         update_stats(type,event)
+        if event_log
+          event_log << event_json
+        end
         if(type == :limit)
           handle_limit(event)
         end

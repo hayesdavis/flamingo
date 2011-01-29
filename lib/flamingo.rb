@@ -13,6 +13,7 @@ require 'flamingo/version'
 require 'flamingo/config'
 require 'flamingo/logging/formatter'
 require 'flamingo/logging/utils'
+require 'flamingo/logging/event_log'
 require 'flamingo/meta'
 require 'flamingo/stats/rate_counter'
 require 'flamingo/dispatch_queue'
@@ -100,6 +101,14 @@ module Flamingo
     
     def meta
       @meta ||= Flamingo::Meta.new(redis)
+    end
+    
+    def new_event_log
+      if event_config = config.logging.event(nil) 
+        Logging::EventLog.new(event_config.dir,event_config.size(0))
+      else
+        nil
+      end
     end
     
     # Intended to be called after a fork so that we don't have 
