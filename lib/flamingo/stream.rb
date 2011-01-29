@@ -53,12 +53,16 @@ module Flamingo
         :name=>name,:resource=>resource,:params=>params.all
       )
     end
+
+    def query
+      params.map{|key,value| "#{key}=#{param_value(value)}" }.join("&")
+    end
+    
+    def to_s
+      "#{path}?#{query}"
+    end
     
     private
-      def query
-        params.map{|key,value| "#{key}=#{param_value(value)}" }.join("&")
-      end
-    
       def param_value(val)
         case val
           when String then CGI.escape(val)
