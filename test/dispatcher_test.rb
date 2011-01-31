@@ -47,9 +47,8 @@ class DispatcherTest < Test::Unit::TestCase
   
   def test_limits_are_logged_as_warnings
     Flamingo.dispatch_queue.enqueue(LIMIT_EVENT)
-    set_standard_meta_event_expectations(:limit)
-    Flamingo.meta.expects(:set).with("events:limit:last_count",100)
-    Flamingo.meta.expects(:set).with("events:limit:last_time",kind_of(Integer))
+    Flamingo.event_stats.expects(:event!).with(:limit)
+    Flamingo.connection_stats.expects(:limited!).with(100)
     Flamingo.logger.expects(:warn).with do |msg|
       msg =~ /^Rate limited/
     end
@@ -58,7 +57,7 @@ class DispatcherTest < Test::Unit::TestCase
   
   def test_meta_info_is_updated_for_each_event
     Flamingo.dispatch_queue.enqueue(TWEET_EVENT)
-    set_standard_meta_event_expectations(:tweet)
+    Flamingo.event_stats.expects(:event!).with(:tweet)
     @dispatcher.run(0)
   end
   
@@ -67,12 +66,5 @@ class DispatcherTest < Test::Unit::TestCase
     Flamingo::Subscription.find(QUEUE_NAME).delete
     teardown_flamingo
   end
-  
-  private
-    def set_standard_meta_event_expectations(event_type)
-      Flamingo.meta.expects(:incr).with("events:all_count")
-      Flamingo.meta.expects(:set).with("events:last_time",kind_of(Integer))
-      Flamingo.meta.expects(:incr).with("events:#{event_type}_count")
-    end
   
 end

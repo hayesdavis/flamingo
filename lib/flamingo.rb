@@ -16,6 +16,8 @@ require 'flamingo/logging/utils'
 require 'flamingo/logging/event_log'
 require 'flamingo/meta'
 require 'flamingo/stats/rate_counter'
+require 'flamingo/stats/events'
+require 'flamingo/stats/connection'
 require 'flamingo/dispatch_queue'
 require 'flamingo/dispatcher'
 require 'flamingo/stream_params'
@@ -68,7 +70,7 @@ module Flamingo
     def redis=(server)
       host, port, db = server.split(':')
       redis = Redis.new(:host => host, :port => port,
-        :thread_safe => true, :db => db)
+        :thread_safe=>true, :db => db)
       @redis = Redis::Namespace.new(namespace, :redis => redis)
       
       # Ensure resque is configured to use this redis as well
@@ -96,12 +98,20 @@ module Flamingo
     end
     
     def dispatch_queue
-      @dispatch_queue ||= Flamingo::DispatchQueue.new(redis)
+      @dispatch_queue ||= DispatchQueue.new(redis)
     end
     
     def meta
-      @meta ||= Flamingo::Meta.new(redis)
+      @meta ||= Meta.new(redis)
     end
+    
+    def event_stats
+      @event_stats ||= Stats::Events.new
+    end
+    
+    def connection_stats
+      @connection_stats ||= Stats::Connection.new
+    end    
     
     def new_event_log
       if event_config = config.logging.event(nil) 
@@ -114,11 +124,11 @@ module Flamingo
     # Intended to be called after a fork so that we don't have 
     # issues with shared file descriptors, sockets, etc
     def reconnect!
-      reconnect_redis_client(@redis)      
-      reconnect_redis_client(Resque.redis)
       # Reload logger
       logger.close
       self.logger = new_logger
+      reconnect_redis_client(@redis)      
+      reconnect_redis_client(Resque.redis)
     end
     
     private

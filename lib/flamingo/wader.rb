@@ -93,6 +93,7 @@ module Flamingo
           Flamingo.logger.info("Connecting to stream: #{stream}")
           self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
           Flamingo.logger.info("Connected to stream")
+          Flamingo.connection_stats.connected!
   
           connection.each_item do |event_json|
             dispatch_event(event_json)

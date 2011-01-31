@@ -10,7 +10,7 @@ module Flamingo
     end
     
     def run(wait_time=0.5)
-      init_for_run
+      init_event_log
       while(!@shutdown) do
         if event = next_event
           dispatch(event)
@@ -25,11 +25,6 @@ module Flamingo
     end
     
     private
-      def init_for_run
-        init_stats
-        init_event_log
-      end
-        
       def next_event
         Flamingo.dispatch_queue.dequeue
       end
@@ -60,31 +55,18 @@ module Flamingo
         if event_log
           event_log << event_json
         end
-        if(type == :limit)
+        if type == :limit
           handle_limit(event)
         end
         Subscription.all.each do |sub|
           Resque::Job.create(sub.name, "HandleFlamingoEvent", type, event)
         end
-      rescue => e 
+      rescue => e
         handle_error(event_json,e)
       end
       
-      def init_stats
-        @count = 0
-        @start_time = Time.now.utc.to_i
-        @rate_counter = Flamingo::Stats::RateCounter.new(10) do |eps|
-          meta.set("events:rate",eps)
-          logger.debug "%.3f eps" % [eps]
-        end
-      end
-
       def update_stats(type, event)
-        @count += 1
-        @rate_counter.event!
-        meta.incr("events:all_count")
-        meta.set("events:last_time",Time.now.to_i)       
-        meta.incr("events:#{type}_count")
+        Flamingo.event_stats.event!(type)
       end
       
       def handle_error(event_json,error)
@@ -94,8 +76,7 @@ module Flamingo
       
       def handle_limit(event)
         skipped = event.values.first
-        meta.set("events:limit:last_count",skipped)
-        meta.set("events:limit:last_time",Time.now.to_i)
+        Flamingo.connection_stats.limited!(skipped)
         logger.warn "Rate limited: #{skipped} skipped"
       end
 
@@ -111,8 +92,6 @@ module Flamingo
         else
           [:tweet, event]
         end
-      rescue
-        logger.warn "Failed to handle: #{event.inspect}"
       end    
     
   end
