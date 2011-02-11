@@ -1,3 +1,18 @@
+0.4.0
+=====
+* Dispatcher is no longer based on Resque. This allows for much higher 
+  throughput. (See Issue #7)
+* The dispatcher can now write directly to a rotating event log (Issue #8). 
+  Event JSON will no longer be written to the main flamingo log (it was 
+  previously written when the log level was set to DEBUG).
+* All types of events that may occur in the stream are handled correctly by the 
+  dispatcher now when placing them on a Resque subscriber queue.
+* Limit messages are now logged to the flamingo log and information about 
+  limits received is stored in the meta store. (Issue #10)
+* The meta information store (available at /meta.json in the REST API) now 
+  contains more information about connections, event rates and limits.
+
+
 0.3.1 (public)
 ==============
 * Fixed issues with shared redis socket connections on forking child processes

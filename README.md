@@ -1,14 +1,18 @@
 Flamingo
 ========
-Flamingo is a resque-based system for handling the Twitter Streaming API.
-
-This is *early alpha* code. Parts of it are graceful, like the curve of a
-flamingo's neck: it capably processes the multiple high-volume sample and filter
-streams that power tweetreach.com. Many parts of it are ungainly, like a
-flamingo's knees: this is early code, and it will change rapidly. And parts of
-it are mired in muck, like a flamingo's feet: it has too few tests, and surely
-some configuration we forgot to tell you about. That said, it does work: give it
-a try if you have the need.
+Flamingo is a service for connecting to and processing events from the Twitter 
+Streaming API. Here are the highlights:
+* It runs as a daemon that you communicate with via a REST API interface.
+* Handles all the work of intelligently managing connections to the 
+  Streaming API (handling things like backoffs and reconnects).
+* Stream events (tweets) can be stored directly to a file on disk via the 
+  built in event log functionality. This is useful for collecting data for 
+  further batch processing of incoming data via hadoop, for example.
+* Stream events can be placed on a Resque queue for downstream processing. This 
+  is an easy way to connect your application logic for processing tweets.
+* It provides helpful metrics like stream rates, event counts, limit information 
+  available via the REST endpoint /meta.json.
+* It supports a minimal configuration REPL via the flamingo command.
 
 Dependencies
 ------------
@@ -16,6 +20,11 @@ Check flamingo.gemspec for all the requirements. Currently there are quite a
 few dependencies and they are very specific. We plan to have fewer dependencies 
 and be more liberal with versions soon. Right now these gems and versions are 
 what is working well in production for us.
+
+Caveat Emptor
+-------------
+This is *alpha* code. However, it processes multiple high-volume streams 
+in production as part of TweetReach.com.
 
 Getting Started
 ---------------
@@ -63,7 +72,7 @@ commandline (see below)
 
 6. Your second task from the flamingo console is to route the incoming tweets onto a queue -- in this case the EXAMPLE queue. This is used by the flamingod we'll start next but has no direct effect now.
 
-        >> Subscription.new('EXAMPLE').save
+        >> Subscription.new('example').save
 
 7. Start the Flamingo Daemon (`flamingod` installed during `gem install`), and also start watching its log file:
 
@@ -80,11 +89,8 @@ commandline (see below)
         [2010-07-20 05:58:07, INFO] - Starting wader on pid=91008 under pid=91003
         [2010-07-20 05:58:07, INFO] - Starting dispatcher on pid=91009 under pid=91003
         [2010-07-20 05:58:12, INFO] - Listening on stream: /1/statuses/filter.json?track=%23etsy,austin,cheaptweet
-        ... short initial delay ....
-        [2010-07-20 05:58:42, DEBUG] - Wader dispatched event
-        [2010-07-20 05:58:42, DEBUG] - Put job on subscription queue EXAMPLE for {"text":If you ever visit Austin make sure to go to Torchy's Tacos",...
 
-    On the resque-web dashboard, you should see a queue come up called EXAMPLE, with jobs accruing. There will only be 0 of 0 workers working: let's fix that
+    On the resque-web dashboard, you should see a queue come up called example, with jobs accruing. There will only be 0 of 0 workers working: let's fix that
         
 8. You'll consume those events with a resque worker, something like the following but more audacious:
 
@@ -99,10 +105,10 @@ commandline (see below)
 
 9. Start the worker task (see `examples/Rakefile`):
         
-        $ QUEUE=EXAMPLE rake -t examples/Rakefile resque:work
+        $ QUEUE=example rake -t examples/Rakefile resque:work
 
    Two things should now happen:
-   * The pent-up jobs from the EXAMPLE queue should spray across your console
+   * The pent-up jobs from the example queue should spray across your console
    * The resque dashboard should show the queue being emptied as a result 
    
 10. Interact with your running flamingod instance via the REST API (by default it is on port 4711)
@@ -122,7 +128,7 @@ components of the flamingo flock:
 
 Coordinates the wader process (initiates stream request, pushes each response
 into the queue), the Sinatra webserver (handles subscriptions and changing 
-stream parameters), and a set of dispatchers (routes responses).
+stream parameters), and a dispatcher (routes events to subscribers).
 
 You can control flamingod with the following signals:
 
@@ -131,7 +137,12 @@ You can control flamingod with the following signals:
 
 *wader*
 
-The wader process starts the stream and dispatches stream responses as they arrive into a Resque queue.
+The wader process starts the stream and queues events as they arrive into a redis list.
+
+*dispatcher*
+
+The dispatcher process retrieves events from the dispatch queue, writes them to 
+the event log (if configured) and to any subscriptions (if configured).
 
 *web server*
 
