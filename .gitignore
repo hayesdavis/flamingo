@@ -1,2 +1,4 @@
 .loadpath
 .project
+*.log
+/configs
