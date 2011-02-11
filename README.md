@@ -2,6 +2,7 @@ Flamingo
 ========
 Flamingo is a service for connecting to and processing events from the Twitter 
 Streaming API. Here are the highlights:
+
 * It runs as a daemon that you communicate with via a REST API interface.
 * Handles all the work of intelligently managing connections to the 
   Streaming API (handling things like backoffs and reconnects).
