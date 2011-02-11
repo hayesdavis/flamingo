@@ -63,6 +63,7 @@ class NonFatalHttpResponsesTest < Test::Unit::TestCase
   end
   
   def teardown
+    super
     self.class.teardown_mockingbird
   end
 

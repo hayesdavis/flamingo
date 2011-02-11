@@ -6,5 +6,5 @@ redis:
 web:
   host: 0.0.0.0:4711
 logging:
-  dest: /dev/null
+  dest: log/flamingo_test.log
   level: INFO

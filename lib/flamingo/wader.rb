@@ -90,8 +90,10 @@ module Flamingo
     private
       def connect_and_run
         EventMachine::run do
+          Flamingo.logger.info("Connecting to stream: #{stream}")
           self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
-          Flamingo.logger.info("Listening on stream: #{stream.path}")
+          Flamingo.logger.info("Connected to stream")
+          Flamingo.connection_stats.connected!
   
           connection.each_item do |event_json|
             dispatch_event(event_json)
@@ -141,7 +143,7 @@ module Flamingo
       end
       
       def dispatch_event(event_json)
-        Resque.enqueue(Flamingo::DispatchEvent, event_json)
+        Flamingo.dispatch_queue.enqueue(event_json)
       end
 
   end

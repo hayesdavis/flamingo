@@ -168,6 +168,7 @@ module Flamingo
 
       def run
         $0 = 'flamingod'
+        Flamingo.logger.info "Flamingod version: #{Flamingo::VERSION}"
         set_process_meta_data
         trap_signals
         start_children

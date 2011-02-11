@@ -75,23 +75,6 @@ class ConfigTest < Test::Unit::TestCase
     assert_equal("test",Flamingo.redis.namespace)
   end
   
-  def test_default_namespace_used_for_dispatch_queue
-    Flamingo.configure!(new_config(
-      "redis"=>{"host"=>"0.0.0.0:6379" }
-    ))
-    assert_equal("flamingo:dispatch",Flamingo.dispatch_queue)
-  end
-  
-  def test_configured_namespace_used_for_dispatch_queue
-    Flamingo.configure!(new_config(
-      "redis"=>{
-        "host"=>"0.0.0.0:6379",
-        "namespace"=>"test"
-      }
-    ))
-    assert_equal("test:dispatch",Flamingo.dispatch_queue)
-  end 
-  
   def test_resque_redis_configured_with_flamingo_redis_host
     Resque.expects(:redis=).with("0.0.0.0:6379").once
     Flamingo.configure!(new_config(
@@ -111,6 +94,42 @@ class ConfigTest < Test::Unit::TestCase
     ))
     assert_equal(:resque,Resque.redis.namespace)
   end
+  
+  def test_event_log_nil_if_not_specified_in_config
+    Flamingo.configure!(new_config(
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test"}
+    ))
+    assert_nil(Flamingo.new_event_log)
+  end
+  
+  def test_event_log_uses_configured_directory_and_max_size
+    event_dir = FileUtils.mkdir("test_event_log").first
+    Flamingo.configure!(new_config(
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test"},
+      "logging"=>{
+        "event"=>{"dir"=>event_dir,"size"=>100}
+      }
+    ))
+    log = Flamingo.new_event_log
+    assert_equal(event_dir,log.dir)
+    assert_equal(100,log.max_size)
+  ensure
+    `rm -r #{event_dir}`
+  end  
+
+  def test_event_log_uses_set_to_not_rotate_if_no_size_specified
+    event_dir = FileUtils.mkdir("test_event_log").first
+    Flamingo.configure!(new_config(
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test"},
+      "logging"=>{
+        "event"=>{"dir"=>event_dir}
+      }
+    ))
+    log = Flamingo.new_event_log
+    assert_equal(0,log.max_size)
+  ensure
+    `rm -r #{event_dir}`
+  end    
   
   def teardown
     Flamingo.teardown
