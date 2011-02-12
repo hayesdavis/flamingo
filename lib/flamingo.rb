@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'redis/namespace'
-require 'twitter/json_stream'
+#require 'twitter/json_stream'
+require 'vendor/twitter-stream/lib/twitter/json_stream'
 require 'resque'
 require 'logger'
 require 'yaml'
@@ -32,6 +33,8 @@ require 'flamingo/daemon/web_server_process'
 require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
 require 'flamingo/web/server'
+
+require 'flamingo/adapters/gnip'
 
 module Flamingo
   

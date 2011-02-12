@@ -91,7 +91,8 @@ module Flamingo
       def connect_and_run
         EventMachine::run do
           Flamingo.logger.info("Connecting to stream: #{stream}")
-          self.connection = stream.connect(:auth=>"#{screen_name}:#{password}")
+          self.connection = stream.connect(:username=>screen_name,
+            :password=>password)
           Flamingo.logger.info("Connected to stream")
           Flamingo.connection_stats.connected!
   

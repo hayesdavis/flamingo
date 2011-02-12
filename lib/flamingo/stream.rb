@@ -18,8 +18,17 @@ module Flamingo
     }
 
     class << self
-      def get(name)
-        new(name,StreamParams.new(name))
+      def get(config)
+        if config.kind_of?(String) || config.kind_of?(Symbol)
+          new(config,StreamParams.new(config))
+        else
+          case config.adapter
+            #TODO some sort of registry here
+            when "gnip" then Adapters::Gnip::Stream.new(config)
+            when "twitter" then new(config.name,StreamParams.new(config.name))  
+            else nil
+          end
+        end
       end
     end
     
@@ -35,9 +44,15 @@ module Flamingo
     end
     
     def connection_options(overrides={})
-      DEFAULT_CONNECTION_OPTIONS.
+      opts = DEFAULT_CONNECTION_OPTIONS.
         merge(overrides).
-        merge(:path=>path,:content=>query)      
+        merge(:path=>path,:content=>query)
+      username = opts.delete(:username)
+      password = opts.delete(:password)
+      if username && password
+        opts[:auth] = "#{username}:#{password}"
+      end
+      opts
     end
     
     def path
