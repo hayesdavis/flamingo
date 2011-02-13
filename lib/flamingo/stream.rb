@@ -18,16 +18,18 @@ module Flamingo
     }
 
     class << self
-      def get(config)
-        if config.kind_of?(String) || config.kind_of?(Symbol)
-          new(config,StreamParams.new(config))
+      def register(name,factory) 
+        @registry ||= {}
+        @registry[name.to_sym] = factory
+      end
+      
+      def get(name)
+        factory = @registry[name.to_sym]
+        if factory
+          factory.new_stream(name)
         else
-          case config.adapter
-            #TODO some sort of registry here
-            when "gnip" then Adapters::Gnip::Stream.new(config)
-            when "twitter" then new(config.name,StreamParams.new(config.name))  
-            else nil
-          end
+          # Old-school regular twitter
+          new(name,StreamParams.new(name))
         end
       end
     end
