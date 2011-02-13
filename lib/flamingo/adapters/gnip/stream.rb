@@ -4,17 +4,24 @@ module Flamingo
       
       class Stream < Flamingo::Stream
         
-        attr_accessor :name, :url
+        attr_accessor :url
         
-        def initialize(config)
-          self.name = config.name
-          self.url = config.url
-          puts self.url
+        def initialize(name,url,rules)
+          super(name,StreamParams.new(name,rules))
+          self.url = url
         end
         
         def connect(options)
           stream_url, cookies = authenticate(options)
           stream_connect(stream_url,cookies)
+        end
+        
+        def to_s
+          url
+        end
+        
+        def resource
+          url
         end
         
         private
