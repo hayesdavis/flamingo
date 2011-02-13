@@ -16,6 +16,10 @@ module Flamingo
         value = @data[name.to_s]
         if value.is_a?(Hash)
           self.class.new(value)
+        elsif value.is_a?(Array)
+          value.map do |e|
+            e.is_a?(Hash) ? self.class.new(e) : e
+          end
         elsif value.nil? || empty_config?(value)
           if !args.empty?
             # Return a default if the value isn't set and there's an argument
