@@ -34,8 +34,6 @@ require 'flamingo/daemon/wader_process'
 require 'flamingo/daemon/flamingod'
 require 'flamingo/web/server'
 
-require 'flamingo/adapters/gnip'
-
 module Flamingo
   
   class << self
@@ -61,6 +59,7 @@ module Flamingo
       validate_config!
       # Ensure redis gets loaded
       redis
+      register_adapters
     end
     
     def config
@@ -135,6 +134,13 @@ module Flamingo
     end
     
     private
+      def register_adapters
+        config.adapters.each do |adapter_config|
+          require(adapter_config.lib)
+          adapter_config.main.constantize.install(adapter_config)          
+        end
+      end
+      
       def reconnect_redis_client(client)
         # Unfortunately older versions of the Redis client don't make these 
         # methods public so we have to use send. Later versions have made 
