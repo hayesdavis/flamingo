@@ -18,13 +18,16 @@ module Flamingo
     }
 
     class << self
+      def registry
+        @registry || {}
+      end
+      
       def register(name,factory) 
-        @registry ||= {}
-        @registry[name.to_sym] = factory
+        registry[name.to_sym] = factory
       end
       
       def get(name)
-        factory = @registry[name.to_sym]
+        factory = registry[name.to_sym]
         if factory
           factory.new_stream(name)
         else
