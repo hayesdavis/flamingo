@@ -31,9 +31,9 @@ class NonFatalHttpResponsesTest < Test::Unit::TestCase
     def codes
       @codes ||= begin
         fatal_codes = [401,403,404,406,413,416]
-        (300..307).map +
-        ((400..417).map - fatal_codes) +
-        (500..505).map
+        (300..307).to_a+
+        ((400..417).to_a - fatal_codes) +
+        (500..505).to_a
       end
     end
     
