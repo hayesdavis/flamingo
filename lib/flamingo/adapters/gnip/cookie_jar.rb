@@ -48,7 +48,6 @@ module Flamingo
         
         def select(uri)
           @cookies.select do |cookie|
-            puts cookie.inspect
             domain = cookie["domain"]
             path = cookie["path"]
             if domain.nil? || !(uri.host =~ /#{domain}$/)
