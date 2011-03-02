@@ -19,7 +19,7 @@ module Flamingo
 
     class << self
       def registry
-        @registry || {}
+        @registry ||= {}
       end
       
       def register(name,factory) 
