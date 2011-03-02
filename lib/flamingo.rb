@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'redis/namespace'
-#require 'twitter/json_stream'
-require 'vendor/twitter-stream/lib/twitter/json_stream'
+require 'twitter/json_stream'
 require 'resque'
 require 'logger'
 require 'yaml'
@@ -135,9 +134,11 @@ module Flamingo
     
     private
       def register_adapters
-        config.adapters.each do |adapter_config|
+        config.adapters([]).each do |adapter_config|
+          logger.info "Registering adapter: #{adapter_config.name}"
           require(adapter_config.lib)
-          adapter_config.main.constantize.install(adapter_config)          
+          adapter_config.main.constantize.install(adapter_config)
+          logger.info "Registered adapter: #{adapter_config.name}"
         end
       end
       
