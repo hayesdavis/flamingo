@@ -20,22 +20,23 @@ module Flamingo
     class InvalidParametersError < HttpStatusError; end
     
     # Fatal error from too many reconnection attempts
-    class MaxReconnectsExceededError < WaderError; end
+    class MaxReconnectsExceededError < WaderError
+      attr_accessor :attempts
+      def initialize(attempts, message)
+        super(message)
+        self.attempts = attempts
+      end
+    end
       
     # Raised if the server is just not available, e.g. Twitter is down
     class ServerUnavailableError < WaderError; end
     
-    attr_accessor :screen_name, :password, :stream, :connection,
-      :server_unavailable_max_retries, 
-      :server_unavailable_wait, 
-      :server_unavailable_retries
+    attr_accessor :screen_name, :password, :stream, :connection
 
     def initialize(screen_name,password,stream)
       self.screen_name = screen_name
       self.password = password
       self.stream = stream
-      self.server_unavailable_max_retries = 5
-      self.server_unavailable_wait = 60
     end
 
     #
@@ -46,23 +47,11 @@ module Flamingo
     #   dispatch each for later handling
     #
     def run
-      self.server_unavailable_retries = 0
       begin
         connect_and_run
       rescue => e
-        # This is largely to get around a bug in Twitter-Stream that should 
-        # be fixed in the next release. If the server is just not there on 
-        # the first try, it blows up. Hopefully this code can be removed after 
-        # that release.
-        Flamingo.logger.warn "Failure initiating connection. Most likely "+
-          "because server is unavailable.\n#{e}\n#{e.backtrace.join("\n\t")}"
-        if server_unavailable_retries < server_unavailable_max_retries
-          sleep(server_unavailable_wait)
-          self.server_unavailable_retries += 1
-          retry
-        else
-          raise ServerUnavailableError.new
-        end
+        Flamingo.logger.fatal "Unexpected failure initiating connection."+
+          "\n#{e}\n#{e.backtrace.join("\n\t")}"
       end
       raise @error if @error
     end
@@ -111,7 +100,7 @@ module Flamingo
   
           connection.on_max_reconnects do |timeout, retries|
             stop_and_raise!(MaxReconnectsExceededError.new(
-              "Failed to reconnect after #{retries-1} retries"
+              retries-1, "Failed to reconnect after #{retries-1} retries"
             ))
           end
         end

@@ -42,17 +42,13 @@ class ReconnectionsTest < Test::Unit::TestCase
   
   def test_retries_if_server_initially_unavailable
     wader = Flamingo::Wader.new('user','pass',MockStream.new)
-    wader.server_unavailable_wait = 0
-    wader.server_unavailable_max_retries = 5
-
-    assert_raise(
-      Flamingo::Wader::ServerUnavailableError,
-      "Expected a server unavailable error to be raised by run"
-    ) do
+    begin
       wader.run
+      fail("Expected exception")
+    rescue => e
+      assert_equal(Flamingo::Wader::MaxReconnectsExceededError,e.class)
+      assert_equal(Twitter::JSONStream::RETRIES_MAX,e.attempts)
     end
-    
-    assert_equal(5,wader.server_unavailable_retries)    
   end
   
   def test_retries_if_server_becomes_unavailable
@@ -80,6 +76,6 @@ class ReconnectionsTest < Test::Unit::TestCase
     end
     
     assert_equal(Twitter::JSONStream::RETRIES_MAX,wader.retries)
-  end  
+  end
   
 end
