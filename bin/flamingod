@@ -4,7 +4,7 @@ $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'flamingo'
 require 'optparse'
 
-puts "Starting flamingod #{Flamingo::VERSION}"
+puts "Starting flamingod #{Flamingo::VERSION} (Ruby #{RUBY_VERSION})"
 
 begin
   options = {:daemonize => nil, :config => nil}

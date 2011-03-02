@@ -168,12 +168,17 @@ module Flamingo
 
       def run
         $0 = 'flamingod'
-        Flamingo.logger.info "Flamingod version: #{Flamingo::VERSION}"
+        log_version
         set_process_meta_data
         trap_signals
         start_children
         wait_on_children
         clear_process_meta_data
+      end
+      
+      def log_version
+        Flamingo.logger.info "Flamingod v#{Flamingo::VERSION}"
+        Flamingo.logger.debug "Ruby v#{RUBY_VERSION}"
       end
     end
   end
