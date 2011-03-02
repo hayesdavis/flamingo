@@ -1,5 +1,14 @@
-require File.join(File.dirname(__FILE__),"test_helper")
+#!/usr/bin/env ruby
 
-Dir.glob("#{File.dirname(__FILE__)}/**/*_test.rb") do |file|
-  require file
+$: << File.expand_path(File.dirname(__FILE__))
+require "test_helper"
+
+if ARGV.empty?
+  Dir.glob("#{File.dirname(__FILE__)}/**/*_test.rb") do |file|
+    require File.expand_path(file)
+  end
+else
+  ARGV.each do |file|
+    require(file)
+  end
 end
