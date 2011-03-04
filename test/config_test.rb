@@ -129,7 +129,23 @@ class ConfigTest < Test::Unit::TestCase
     assert_equal(0,log.max_size)
   ensure
     `rm -r #{event_dir}`
-  end    
+  end  
+  
+  def test_stream_adapters_registered_if_configured
+    Flamingo.configure!(new_config(
+      "redis"=>{"host"=>"0.0.0.0:6379","namespace"=>"test"},
+      "adapters"=>[
+        {"name"=> "test", 
+          "lib"=>"adapters/mock_adapter",
+          "main"=>"MockAdapter",
+          "streams"=>[{"name"=> "stream1"}]
+        }
+      ]
+    ))
+    assert(MockAdapter.installed?)
+    assert_equal("test",MockAdapter.config.name)
+    assert_equal(:stream1,Flamingo::Stream.get(:stream1).name)
+  end
   
   def teardown
     Flamingo.teardown
