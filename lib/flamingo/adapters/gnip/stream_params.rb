@@ -24,7 +24,7 @@ module Flamingo
 
         def delete(key)
           validate_key(key)
-          rules.delete(get(key))
+          rules.delete(*get(key))
           get(key)
         end
 
@@ -41,7 +41,7 @@ module Flamingo
         private
           def validate_key(key)
             unless key.to_sym == :rules
-              raise ArgumentError("rules is only supported key for this stream")
+              raise ArgumentError.new("rules is only supported key for this stream")
             end
           end
         
