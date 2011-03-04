@@ -3,15 +3,6 @@ require "flamingo/adapters/gnip"
 
 class MainTest < Test::Unit::TestCase
 
-#adapters:
-#  - name: gnip
-#    lib: flamingo/adapters/gnip
-#    main: Flamingo::Adapters::Gnip
-#    streams:
-#      - name: gnip_powertrack
-#        stream_url: https://tweetreach-powertrack.gnip.com/data_collectors/1/track.json
-#        rules_url: https://tweetreach-powertrack.gnip.com/data_collectors/1/rules.json
-
   def setup
     @config = Flamingo::Config.new(
       "name"=> "gnip", 
