@@ -7,7 +7,7 @@ class StreamParamsTest < Test::Unit::TestCase
     @params = Flamingo::Adapters::Gnip::StreamParams.new("powertrack",@rules) 
   end
   
-  def test_attempting_to_access_param_besides_rule_fails
+  def test_attempting_to_access_param_besides_rules_fails
     assert_raises(ArgumentError) do
       @params[:foo]
     end
@@ -31,6 +31,12 @@ class StreamParamsTest < Test::Unit::TestCase
     @rules.expects(:delete).with("a","b").then(state.is("deleted"))
     @rules.expects(:get).returns({:rules=>[]}).when(state.is("deleted"))
     @params.delete(:rules)
-  end    
+  end
+  
+  def test_get_retuns_array_of_rules
+    rules_hash = {:rules=>[{:value=>"a"},{:value=>"b"}]}
+    @rules.expects(:get).returns(rules_hash)
+    assert_equal(%w(a b).sort,@params.get(:rules).sort)
+  end
   
 end
