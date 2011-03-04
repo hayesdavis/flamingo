@@ -38,7 +38,7 @@ module Flamingo
             stream.params[key] = params[key].split(",")
           end
         end
-        change_predicates  
+        stream_changed(stream)  
         to_json(
           :name=>stream.name,
           :resource=>stream.resource,
@@ -65,7 +65,7 @@ module Flamingo
         if remove_terms
           stream.params.remove(key,*remove_terms.split(","))
         end
-        change_predicates
+        stream_changed(stream)
         to_json(stream.params[key])
       end
       
@@ -74,7 +74,7 @@ module Flamingo
         stream = Stream.get(params[:name])
         new_terms = params[:values]
         stream.params[key] = new_terms.split(",")
-        change_predicates
+        stream_changed(stream)
         to_json(stream.params[key])
       end
       
@@ -86,7 +86,7 @@ module Flamingo
         else
           stream.params.remove(key,*params[:values].split(","))
         end
-        change_predicates
+        stream_changed(stream)
         to_json(stream.params[key])
       end
       
@@ -118,10 +118,14 @@ module Flamingo
       end
       
       private
-        def change_predicates
+        def stream_changed(stream)
           if options.respond_to?(:daemon_pid)
-            Process.kill("USR1",options.daemon_pid)
-            Flamingo.logger.info "Rotating wader in daemon"
+            if stream.reconnect_on_change? 
+              Process.kill("USR1",options.daemon_pid)
+              Flamingo.logger.info "Rotating wader in daemon"
+            else
+              Flamingo.logger.info "Stream changed but reconnect not required"
+            end
           end
         end
     

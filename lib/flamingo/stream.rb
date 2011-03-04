@@ -82,6 +82,10 @@ module Flamingo
       "#{path}?#{query}"
     end
     
+    def reconnect_on_change?
+      true
+    end
+    
     private
       def param_value(val)
         case val

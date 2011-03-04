@@ -24,6 +24,10 @@ module Flamingo
           url
         end
         
+        def reconnect_on_change?
+          false
+        end
+        
         private
           def stream_connect(stream_url,cookies)
             uri = URI.parse(stream_url)
