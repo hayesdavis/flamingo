@@ -16,19 +16,15 @@ module Flamingo
         end
         
         def add(*values)
-          request(Net::HTTP::Post) do |conn,req|
-            req.body = to_rules_json(values)
-          end
+          request(Net::HTTP::Post,to_rules_json(values))
         end
         
         def delete(*values)
-          request(Net::HTTP::Delete) do |conn,req|
-            req.body = to_rules_json(values)
-          end
+          request(Net::HTTP::Delete,to_rules_json(values))
         end
 
         private
-          def request(type)
+          def request(type,body=nil)
             uri = URI.parse(resource)
             conn = Net::HTTP.new(uri.host,uri.port)
             conn.use_ssl = (uri.scheme == 'https')
@@ -36,12 +32,23 @@ module Flamingo
               req = type.new(uri.request_uri)
               req["Content-type"] = "application/json"
               req.basic_auth(username,password)
-              if block_given?
-                yield(conn,req)
+              if body
+                req.body = body
               end
               http.request(req)
             end
-            Yajl::Parser.parse(res.body,:symbolize_keys=>true)          
+            parsed = parse_response(res.body)
+            code = res.code.to_i
+            if parsed.nil? || (code < 200 || code >= 300)
+              raise RulesError.new(type::METHOD,uri.to_s,code,res.body,parsed)
+            end
+            parsed
+          end
+          
+          def parse_response(body)
+            Yajl::Parser.parse(body,:symbolize_keys=>true)
+          rescue
+            nil
           end
   
           def to_rules_json(values)
