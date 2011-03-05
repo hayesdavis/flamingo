@@ -11,7 +11,7 @@ module Flamingo
     
     def method_missing(name,*args,&block)
       if name.to_s =~ /(.+)=$/
-        @data[$1] = *args
+        @data[$1] = (args.length == 1 ? args.first : args)
       else
         value = @data[name.to_s]
         if value.is_a?(Hash)
