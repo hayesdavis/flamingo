@@ -2,6 +2,8 @@ module Flamingo
   module Web
     class Server < Sinatra::Base
       
+      FORMAT = %{%s\n  Request:\n    %s - %s "%s %s%s %s" %d\n  Params:\n    %s\n  Full Error:\n%s}
+      
       set :root, File.expand_path(File.dirname(__FILE__))
       set :static, true
       set :logging, true
@@ -18,6 +20,7 @@ module Flamingo
         to_json(Flamingo.meta.to_h)
       end
       
+      # Streams
       get '/streams/:name.json' do
         stream = Stream.get(params[:name])
         to_json(
@@ -43,7 +46,7 @@ module Flamingo
           :name=>stream.name,
           :resource=>stream.resource,
           :params=>stream.params.all
-        )      
+        )
       end
       
       get '/streams/:name/:key.json' do
@@ -115,6 +118,29 @@ module Flamingo
         not_found(to_json(:error=>"Subscription does not exist")) unless sub
         sub.delete
         to_json(:name=>sub.name)
+      end
+
+      error do
+        err = env['sinatra.error']
+        Flamingo.logger.error("API Server") do
+          FORMAT % [
+            "Uncaught error: #{err.message}",
+            env['HTTP_X_FORWARDED_FOR'] || env["REMOTE_ADDR"] || "-",
+            env["REMOTE_USER"] || "-",
+            env["REQUEST_METHOD"],
+            env["PATH_INFO"],
+            env["QUERY_STRING"].empty? ? "" : "?"+env["QUERY_STRING"],
+            env["HTTP_VERSION"],
+            status.to_s[0..3],
+            params.inspect,
+            Logging::Utils.error_trace(err,4)
+          ]
+        end
+        if request.path_info =~ /\.json$/
+          to_json({:error=>err.message})
+        else
+          err.message
+        end
       end
       
       private
