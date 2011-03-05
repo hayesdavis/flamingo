@@ -30,7 +30,7 @@ class StreamTest < Test::Unit::TestCase
       :content=>"track=a,b,c"
     })
     params = Flamingo::StreamParams.new(:filter)
-    params.expects(:each).yields([:track,%w(a b c)])
+    params.expects(:each).yields(:track,%w(a b c))
     s = Flamingo::Stream.new(:filter,params)
     s.connect(:username=>"username",:password=>"password")
   end
