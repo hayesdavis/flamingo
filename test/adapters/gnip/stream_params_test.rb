@@ -68,5 +68,23 @@ class StreamParamsTest < Test::Unit::TestCase
     @rules.expects(:get).returns(rules_hash)
     assert_equal(%w(a b).sort,@params.get(:rules).sort)
   end
-  
+
+  def test_set_adds_only_new_rules_and_deletes_unused_rules_case_insensitively
+    @rules.expects(:add).with("C","x")
+    @rules.expects(:delete).with("y","z")
+    @rules.expects(:get).returns(
+      {:rules=>[{:value=>'a'},{:value=>'b'},{:value=>'y'},{:value=>'z'}]})
+    all_rules = @params.set(:rules,"a","b","C","x")
+    assert_equal(%w(a b C x).sort,all_rules.sort)
+  end
+
+  def test_set_does_nothing_unless_actual_change
+    @rules.expects(:add).never
+    @rules.expects(:delete).never
+    @rules.expects(:get).returns(
+      {:rules=>[{:value=>'a'},{:value=>'b'},{:value=>'y'},{:value=>'z'}]})
+    all_rules = @params.set(:rules,"A","b","Y","z")
+    assert_equal(%w(A b Y z).sort,all_rules.sort)
+  end
+
 end
