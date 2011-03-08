@@ -21,7 +21,7 @@ module Flamingo
           end
           
           def to_cookie_header(cookies)
-            cookies.map{|c| "#{c["name"]}=#{c["value"]}"}.join("\r\n")
+            cookies.map{|c| "#{c["name"]}=#{c["value"]}"}.join("; ")
           end
         end
         
