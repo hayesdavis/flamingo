@@ -3,6 +3,8 @@ require 'net/https'
 require 'flamingo/adapters/gnip/cookie_jar'
 require 'flamingo/adapters/gnip/rules_error'
 require 'flamingo/adapters/gnip/rules'
+require 'flamingo/adapters/gnip/connection'
+require 'flamingo/adapters/gnip/failed_connection'
 require 'flamingo/adapters/gnip/stream'
 require 'flamingo/adapters/gnip/stream_params'
 
