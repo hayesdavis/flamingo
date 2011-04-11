@@ -18,11 +18,11 @@ module Flamingo
           curr_rules = get(key)
           to_add = subtract(values,curr_rules)
           to_delete = subtract(curr_rules,values)
-          unless to_add.empty?
-            add_rules!(to_add)
-          end
           unless to_delete.empty?
             delete_rules!(to_delete)
+          end
+          unless to_add.empty?
+            add_rules!(to_add)
           end
           values
         end
