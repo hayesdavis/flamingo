@@ -25,7 +25,7 @@ class StreamTest < Test::Unit::TestCase
   
   def test_connection_options_specified_correctly
     Twitter::JSONStream.expects(:connect).with({
-      :method=>"POST", :ssl=>false, :user_agent=>"Flamingo/#{Flamingo::VERSION}",
+      :method=>"POST", :ssl=>true, :user_agent=>"Flamingo/#{Flamingo::VERSION}",
       :auth=>"username:password", :path=>"/1/statuses/filter.json",
       :content=>"track=a,b,c"
     })

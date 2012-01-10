@@ -13,7 +13,7 @@ module Flamingo
     
     DEFAULT_CONNECTION_OPTIONS = {
       :method     =>"POST", 
-      :ssl        => false, 
+      :ssl        => true,
       :user_agent => "Flamingo/#{Flamingo::VERSION}"
     }
 
