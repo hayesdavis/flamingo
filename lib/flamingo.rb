@@ -142,12 +142,14 @@ module Flamingo
         end
       end
       
-      def reconnect_redis_client(client)
-        # Unfortunately older versions of the Redis client don't make these 
-        # methods public so we have to use send. Later versions have made 
-        # these public.
-        if client && (client.send(:connected?) rescue true)
-          client.send(:reconnect)
+      def reconnect_redis_client(redis)
+        # Do some sad hacking for different redis client versions of reconnect
+        if redis
+          if redis.respond_to?(:client)
+            redis.client.reconnect #2+
+          elsif (redis.send(:connected?) rescue true)
+            redis.send(:reconnect) #1+ - These methods aren't public
+          end
         end
       end
       
