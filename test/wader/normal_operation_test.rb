@@ -16,7 +16,7 @@ class NormalOperationTest < Test::Unit::TestCase
   
   def test_receives_and_consumes_events
     expected_count = 100
-    Mockingbird.setup(:port=>8080) do
+    Mockingbird.setup(:port=>8080,:quiet=>true) do
       expected_count.times do |i| 
         send %Q({"foo":"bar#{i}"})
       end

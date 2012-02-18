@@ -23,7 +23,7 @@ class ConnectionTest < Test::Unit::TestCase
   end
   
   def test_reconnects_and_reauthenticates_after_disconnect
-    Mockingbird.setup(:port=>8080) do    
+    Mockingbird.setup(:port=>8080,:quiet=>true) do
 
       on_connection(1) do
         10.times do 

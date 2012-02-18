@@ -12,7 +12,7 @@ class NonFatalHttpResponsesTest < Test::Unit::TestCase
         conn_codes = self.codes
         puts "WARNING: #{self.name} will take some time to complete."
         puts "Testing #{conn_codes.length} HTTP status codes"
-        Mockingbird.setup(:port=>8080) do
+        Mockingbird.setup(:port=>8080,:quiet=>true) do
           conn_codes.each_with_index do |code, num|
             # We have to do all this math because each status code is going to 
             # be sent down 2x. One on the initial connect, one on the retry

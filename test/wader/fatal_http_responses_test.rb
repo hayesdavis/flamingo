@@ -36,7 +36,7 @@ class FatalHttpResponsesTest < Test::Unit::TestCase
 
   private
     def run_test_for_status_code(code,message,error_type)
-      Mockingbird.setup(:port=>8080) do
+      Mockingbird.setup(:port=>8080,:quiet=>true) do
         status code, message
       end
       

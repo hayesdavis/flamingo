@@ -5,7 +5,7 @@ class ReconnectionsTest < Test::Unit::TestCase
   include WaderTest
   
   def test_raises_after_max_reconnect_attempts
-   Mockingbird.setup(:port=>8080) do
+   Mockingbird.setup(:port=>8080,:quiet=>true) do
      
     # Success on first connection
     on_connection(1) do
@@ -52,7 +52,7 @@ class ReconnectionsTest < Test::Unit::TestCase
   end
   
   def test_retries_if_server_becomes_unavailable
-    Mockingbird.setup(:port=>8080) do
+    Mockingbird.setup(:port=>8080,:quiet=>true) do
       # Success on first connection
       on_connection(1) do
         10.times do 
