@@ -37,20 +37,27 @@ module Flamingo
               end
               http.request(req)
             end
+
             parsed = parse_response(res.body)
             code = res.code.to_i
+
             if parsed.nil? || (code < 200 || code >= 300)
               raise RulesError.new(type::METHOD,uri.to_s,code,res.body,parsed)
             end
             parsed
           end
-          
+
+          # Parse the body content as JSON. Returns nil if there is an error
           def parse_response(body)
-            Yajl::Parser.parse(body,:symbolize_keys=>true)
+            json = Yajl::Parser.parse(body,:symbolize_keys=>true)
+            # This can come back nil if the body is blank. This apparently 
+            # can happen for a 201 response on a POST that adds a rule and it 
+            # shouldn't be treated as an error
+            json || {}
           rescue
             nil
           end
-  
+
           def to_rules_json(values)
             rules = []
             values.each do |value|
