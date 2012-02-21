@@ -10,7 +10,7 @@ class ReconnectionsTest < Test::Unit::TestCase
     # Success on first connection
     on_connection(1) do
       10.times do 
-        send '{"foo":"bar"}'
+        send %Q({"foo":"bar"}\r)
         wait 0.1
       end
       close
@@ -56,7 +56,7 @@ class ReconnectionsTest < Test::Unit::TestCase
       # Success on first connection
       on_connection(1) do
         10.times do 
-          send '{"foo":"bar"}'
+          send %Q({"foo":"bar"}\r)
           wait 0.1
         end
         close
