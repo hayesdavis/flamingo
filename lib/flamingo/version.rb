@@ -1,3 +1,3 @@
 module Flamingo
-  Version = VERSION = '0.5.0.gnip5'
+  Version = VERSION = '0.6.0.gnip1'
 end

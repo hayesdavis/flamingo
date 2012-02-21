@@ -25,11 +25,11 @@ Gem::Specification.new do |s|
   s.add_dependency "redis",           ">= 1.0.7"
   s.add_dependency "redis-namespace", "= 0.7.0"
   s.add_dependency "resque",          "= 1.9.7"
-  s.add_dependency "hayesdavis-twitter-stream",  ">= 0.2.0"
+  s.add_dependency "hayesdavis-twitter-stream",  ">= 0.3.0"
   s.add_dependency "yajl-ruby",       "= 0.7.6"
     
   s.add_development_dependency "mocha", ">= 0.9.8"
-  s.add_development_dependency "mockingbird", ">= 0.1.0"
+  s.add_development_dependency "mockingbird", ">= 0.2.0"
 
   s.description = <<-description
     Flamingo makes it easy to wade through the Twitter Streaming API by 
