@@ -27,8 +27,20 @@ class GnipStreamTest < Test::Unit::TestCase
     stream.connect(:username=>username,:password=>password)
   end
 
-  def test_handles_compressed_content_encoding
-    
+  def test_creates_connection_with_correct_options_when_query_present
+    Twitter::JSONStream.expects(:connect).with(has_entries(
+      :path=>"/accounts/TweetReach/publishers/twitter/replay/track/prod.json?fromDate=201202200000&toDate=201202300000"
+    ))
+    username = "foo"
+    password = "bar"
+    stream = Flamingo::Adapters::Gnip::Stream.new("power_track",
+      "https://stream.gnip.com:443/accounts/TweetReach/publishers/twitter/replay/track/prod.json?fromDate=201202200000&toDate=201202300000",
+      Flamingo::Adapters::Gnip::Rules.new(
+        "https://api.gnip.com:443/accounts/TweetReach/publishers/twitter/replay/track/prod/rules.json",
+        username,password
+      )
+    )
+    stream.connect(:username=>username,:password=>password)
   end
 
 end
