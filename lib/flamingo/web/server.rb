@@ -7,6 +7,15 @@ module Flamingo
       set :root, File.expand_path(File.dirname(__FILE__))
       set :static, true
       set :logging, true
+
+      before do
+        # Ensure all params are encoded as UTF-8
+        params.each do |key,value|
+          if value.kind_of?(String)
+            params[key] = value.force_encoding("utf-8")
+          end
+        end
+      end
   
       get '/' do
         content_type 'text/plain'
